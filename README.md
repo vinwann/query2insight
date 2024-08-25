@@ -1,6 +1,6 @@
 # query2insight
 
-https://github.com/user-attachments/assets/bb1e3c13-9a83-470d-bd27-43c12596eee5
+![ui](https://github.com/user-attachments/assets/731ab513-591f-4b60-9b22-88676a4fe831)
 
 
 https://github.com/user-attachments/assets/03be5b37-e971-4287-8084-93893323c021

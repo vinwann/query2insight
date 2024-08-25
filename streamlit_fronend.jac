@@ -24,14 +24,11 @@ can main() {
     
     if (state == 0)
     {
-    create_graph(   user_data={ "age": 20,
-                                    "Pressure": (120, 80),
-                                    "Married": False
-                                },
-                        todo_list=["Do heart surgery",
-                                    "Buy Bread",
-                                    "Have pizza for dinner"]
-                    ) spawn root;
+    with open('user_info.json', 'r') as f{
+            imported_data = json.load(f);
+        }
+    create_graph(   user_data = imported_data['user_data'],
+                        todo_list = imported_data['todo_list']) spawn root;
         state = 2;
         chat() spawn [root-->](`?user)[0];
     }
@@ -48,14 +45,16 @@ can main() {
 }
 
 enum task_type {
-    RAG_TYPE : 'Need to use Retrivable information in specific medical articles' = "RAG",
+    RAG_TYPE : 'Need to use Retrivable information in specific topic' = "RAG",
     QA_TYPE : 'Need to use given user information about themselves' = "user_qa"
     #TODO_TYPE : 'Need to use the todo list of the user' = "todo"
 }
 glob router_examples: 'Examples of routing of a query.if you are uncerteain of the routing method pick task_type.QA_TYPE. Do not pick anything outside of these three options': dict[str, task_type] = {
     #'When is my next check up?': task_type.TODO_TYPE,
-    'How healthy am I?': task_type.QA_TYPE,
+    'whats my name?': task_type.QA_TYPE,
+    'whats are my tasks for today?': task_type.QA_TYPE,
     'What are the symptoms of low blood pressure?': task_type.RAG_TYPE
+    'What is a varible in python?': task_type.RAG_TYPE
 };
 
 glob role_examples: 'Examples for picking assitant role.You are not limited to these examples.if you are uncerteain of the role pick personal assistant': dict[str, str] = {
@@ -169,9 +168,10 @@ node user_QA{
     can print_output with query entry;
     can 'semstring'
     chat_llm(user_data:'data about the user':list,
-             query:'The question the user has.':str,
-             chat_history:'Previous Conversation with the user':list) -> 'response':str by llm(temperature=0.7, max_tokens=1024);
-    can 'You run in a loop of Thought, Action, PAUSE, Observation.\nAt the end of the loop you output an Answer\nUse Thought to describe your thoughts about the question you have been asked.\nUse Action to run one of the actions available to you - then return PAUSE.\nObservation will be the result of running those actions.\n\nYour available actions are:\n\ncalculate:\ne.g. calculate: 4 * 7 / 3\nRuns a calculation and returns the number - uses Python so be sure to use floating point syntax if necessary\n\nget_planet_mass:\ne.g. get_planet_mass: Earth\nreturns weight of the planet in kg'
+            todo_list:'data about the health status of the user':list,
+            query:'The question the user has.':str,
+            chat_history:'Previous Conversation with the user':list) -> 'response':str by llm(temperature=0.7, max_tokens=1024);
+    can 'You run in a loop of Thought, Action, PAUSE, Observation.\nAt the end of the loop you output an Answer\nUse Thought to describe your thoughts about the question you have been asked.\nUse Action to run one of the actions available to you - then return PAUSE.\nObservation will be the result of running those actions.\n\nYour available actions are:\n\ngetUserData:\ne.g. getUserData:\nProvides the data about the user in json format\n\ngetUserTasks:\ne.g. getUserTasks:\nProvides the users task list in json format\n\ngetCurrentDateTime:\ne.g. getCurrentDateTime:\nProvides the current data and time\nExample session:\n\nQuestion: Whats my name?\nThought: I need to find the users name\nAction: getUserData:\nPAUSE \n\nYou will be called again with this:\n\nObservation: { "name":"vinura",\n"age": 20,\n"Pressure": (120, 80),\n"Married": False\n}\n\nIf you have the answer, output it as the Answer.\n\nAnswer:Your name is Vinura.'
     agent_llm(query:'The question the user has.':str) -> 'response':str by llm(temperature=0.7, max_tokens=1024);
 }
 node user_TODO{

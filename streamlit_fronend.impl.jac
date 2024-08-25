@@ -19,12 +19,20 @@
     tinydb_service = TinyDBService('chat'+here.session_id);
     #print(tinydb_service.return_chat_history());
     self.answer = self.chat_llm(user_data=here.user_data,
+                                todo_list=here.todo_list,
                                 query=here.inquiry_by_user,
                                 chat_history=tinydb_service.return_chat_history());
     gui.display_response(self.answer);
     here.user_query["role"] = "assistant";
     here.user_query["content"] = self.answer;
     here.inquiry_by_user = '';
+    """i=0;
+    while (i<4)
+    {
+        self.answer = self.agent_llm(query=here.inquiry_by_user);
+        gui.display_response(self.answer);
+        i+=1;
+    }"""
     
     visit [<--];
 }

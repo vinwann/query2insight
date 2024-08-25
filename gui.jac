@@ -3,8 +3,21 @@ import:py from PIL, Image;
 
 can start() {
     
-    st.title("Assitant");
-    if st.button('start new chat'){
+    st.markdown("<h1 style='text-align: center;'>Query2Insight</h1>", unsafe_allow_html=True);
+    st.markdown(
+    """
+    <style>
+    .full-width-button {
+        display: flex;
+        justify-content: center;
+    }
+    .stButton button {
+        width: 100%;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True);
+    if st.sidebar.button('start new chat'){
         return True;
     }
     return False;

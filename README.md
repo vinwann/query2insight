@@ -5,5 +5,5 @@
 
 https://github.com/user-attachments/assets/03be5b37-e971-4287-8084-93893323c021
 
-![Data spactial structure](https://github.com/user-attachments/assets/9983ce71-ada5-45e2-9ac6-c9a799cad06b)
+![Data spactial structure](https://github.com/user-attachments/assets/a00294e4-089b-42de-92a6-d178eb93a65a)
  

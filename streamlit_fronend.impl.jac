@@ -1,9 +1,11 @@
 :node:RAG:can:print_output{
+    tinydb_service = TinyDBService('chat'+here.session_id);
     self.answer =self.chat_llm(
             todo_list=here.todo_list,
             user_data=here.user_data,
             query=here.inquiry_by_user,
-            retrived_context=RagEngine.get_from_chroma(query=here.inquiry_by_user)
+            retrived_context=RagEngine.get_from_chroma(query=here.inquiry_by_user,
+            chat_history=tinydb_service.return_chat_history())
         );
     gui.display_response(self.answer);
     here.user_query["role"] = "assistant";
@@ -12,16 +14,24 @@
     visit [<--];
 }
 
+
 :node:user_QA:can:print_output{
-    self.answer = self.chat_llm(user_data=here.user_data,query=here.inquiry_by_user);
+    tinydb_service = TinyDBService('chat'+here.session_id);
+    #print(tinydb_service.return_chat_history());
+    self.answer = self.chat_llm(user_data=here.user_data,
+                                query=here.inquiry_by_user,
+                                chat_history=tinydb_service.return_chat_history());
     gui.display_response(self.answer);
     here.user_query["role"] = "assistant";
     here.user_query["content"] = self.answer;
     here.inquiry_by_user = '';
+    
     visit [<--];
 }
 :node:user_TODO:can:print_output{
-    self.answer = self.chat_llm(todo_list=here.todo_list,query=here.inquiry_by_user);
+    tinydb_service = TinyDBService('chat'+here.session_id);
+    self.answer = self.chat_llm(todo_list=here.todo_list,query=here.inquiry_by_user,
+                                chat_history=tinydb_service.return_chat_history());
     gui.display_response(self.answer);
   
     here.user_query["role"] = "assistant";
@@ -39,6 +49,13 @@
         here.user_data =self.user_data;
         here.todo_list = self.todo_list;
         here.chat_history = [];
+
+        if (len(here.inquiry_by_user) > 0 and len(self.session_assitant_type) <1 )
+        {
+            self.session_assitant_type = self.pick_assitant_type(here.inquiry_by_user);
+            print(self.session_assitant_type);
+        }
+            
         
     }
     if (here.query_state == 0)
@@ -67,9 +84,7 @@
         print(task);
         if task == task_type.RAG_TYPE {
             visit [-->](`?RAG);
-        } elif task == task_type.TODO_TYPE {
-            visit [-->](`?user_TODO);
-        } elif task == task_type.QA_TYPE | task != None {
+        }  elif task == task_type.QA_TYPE | task != None {
             visit [-->](`?user_QA);
         }   
         else

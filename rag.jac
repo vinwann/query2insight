@@ -13,6 +13,7 @@ obj rag_engine {
         documents:list = self.load_documents();
         chunks:list = self.split_documents(documents);
         self.add_to_chroma(chunks);
+        
     }
 
     can load_documents{

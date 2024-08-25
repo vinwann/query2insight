@@ -1,0 +1,1 @@
+{"_default": {"1": {"role": "user", "content": "hi tell me about me"}, "2": {"role": "assistant", "content": "Hello! You're 20 years old, your blood pressure is 120/80mmHg, and you're not married."}, "3": {"role": "user", "content": "anything else?"}, "4": {"role": "assistant", "content": "Sorry, I didn't understand that. Can you rephrase your question?"}}}

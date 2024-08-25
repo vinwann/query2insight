@@ -171,6 +171,7 @@ node user_QA{
             todo_list:'data about the health status of the user':list,
             query:'The question the user has.':str,
             chat_history:'Previous Conversation with the user':list) -> 'response':str by llm(temperature=0.7, max_tokens=1024);
+            
     can 'You run in a loop of Thought, Action, PAUSE, Observation.\nAt the end of the loop you output an Answer\nUse Thought to describe your thoughts about the question you have been asked.\nUse Action to run one of the actions available to you - then return PAUSE.\nObservation will be the result of running those actions.\n\nYour available actions are:\n\ngetUserData:\ne.g. getUserData:\nProvides the data about the user in json format\n\ngetUserTasks:\ne.g. getUserTasks:\nProvides the users task list in json format\n\ngetCurrentDateTime:\ne.g. getCurrentDateTime:\nProvides the current data and time\nExample session:\n\nQuestion: Whats my name?\nThought: I need to find the users name\nAction: getUserData:\nPAUSE \n\nYou will be called again with this:\n\nObservation: { "name":"vinura",\n"age": 20,\n"Pressure": (120, 80),\n"Married": False\n}\n\nIf you have the answer, output it as the Answer.\n\nAnswer:Your name is Vinura.'
     agent_llm(query:'The question the user has.':str) -> 'response':str by llm(temperature=0.7, max_tokens=1024);
 }

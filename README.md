@@ -6,4 +6,6 @@
 https://github.com/user-attachments/assets/03be5b37-e971-4287-8084-93893323c021
 
 ![Data spactial structure](https://github.com/user-attachments/assets/a00294e4-089b-42de-92a6-d178eb93a65a)
+
+![llm calls](https://github.com/user-attachments/assets/f67854ef-d5ce-4059-808e-dce323e5ac73)
  

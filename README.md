@@ -12,7 +12,7 @@
     <li>Python</li>
     <li>JacLang (Graph-Based Language)</li>
     <li>Groq (llama3-8b)</li>
-    <li>mtllm [https://github.com/Jaseci-Labs/mtllm/tree/main] </li>
+    <li>MTLLM API library [https://github.com/Jaseci-Labs/mtllm/tree/main] </li>
     <li>Streamlit (GUI)</li>
     <li>TinyDB (Database Management for metadata)</li>
     <li>Ollama (Generate embeddings)</li>

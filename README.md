@@ -1,5 +1,5 @@
 <div align="center">
-<h1></h1>query2insight</h1>
+<h1>query2insight</h1>
 
 ![ui](https://github.com/user-attachments/assets/731ab513-591f-4b60-9b22-88676a4fe831)
 

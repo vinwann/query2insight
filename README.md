@@ -2,7 +2,7 @@
 <h1>Query2Insight</h1>
 
 <p><strong>Description </strong></p>
-  <p>Query2Insight is an LLM-powered chatbot designed to provide users with tailored insights and assistance across various domains. The app integrates several cutting-edge technologies to enhance its functionality and user experience. It utilizes the power of Groq for efficient model execution and leverages Streamlit for an interactive user interface. The backend is supported by TinyDBService, which manages the chatbot's metadata and session information. The RAG engine plays a crucial role in retrieving context-specific information to ensure accurate responses. The chatbot is capable of handling different types of queries, including those related to programming, health, and general assistance.</p>
+  <p>Query2Insight is a fully open-source LLM-powered chatbot designed to provide users with tailored insights and assistance across various domains. The app integrates several cutting-edge technologies to enhance its functionality and user experience. It utilizes the power of Groq for efficient model execution and leverages Streamlit for an interactive user interface. The backend is supported by TinyDBService, which manages the chatbot's metadata and session information. The RAG engine plays a crucial role in retrieving context-specific information to ensure accurate responses. The chatbot is capable of handling different types of queries, including those related to programming, health, and general assistance.</p>
   
   
   <div align="left">
@@ -12,8 +12,10 @@
     <li>Python</li>
     <li>JacLang (Graph-Based Language)</li>
     <li>Groq (llama3-8b)</li>
+    <li>mtllm [https://github.com/Jaseci-Labs/mtllm/tree/main] </li>
     <li>Streamlit (GUI)</li>
     <li>TinyDB (Database Management for metadata)</li>
+    <li>Ollama (Generate embeddings)</li>
     <li>ChromaDB (Vector database)</li>
     <li>RAG Engine (Retrieval-Augmented Generation)</li>
     <li>JSON (Data Management)</li>

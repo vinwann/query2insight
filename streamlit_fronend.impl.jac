@@ -18,7 +18,6 @@
     tinydb_service = TinyDBService('chat'+here.session_id);
     #print(tinydb_service.return_chat_history());
     self.answer = self.chat_llm(user_data=here.user_data,
-                                todo_list=here.todo_list,
                                 query=here.inquiry_by_user,
                                 chat_history=tinydb_service.return_chat_history());
     gui.display_response(self.answer);
@@ -49,7 +48,7 @@
         here.todo_list = self.todo_list;
         here.chat_history = [];
 
-        if (len(here.inquiry_by_user) > 0 and len(self.session_assitant_type) <1 )
+        if (len(here.inquiry_by_user) > 0 )
         {
             self.session_assitant_type = self.pick_assitant_type(here.inquiry_by_user);
             print(self.session_assitant_type);

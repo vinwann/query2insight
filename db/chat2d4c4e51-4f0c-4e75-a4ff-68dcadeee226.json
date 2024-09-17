@@ -1,0 +1,1 @@
+{"_default": {"1": {"role": "user", "content": "hi"}, "2": {"role": "assistant", "content": "Hi there! How can I help you today?"}, "3": {"role": "user", "content": "tell some details about me"}, "4": {"role": "assistant", "content": "Here is the output in the desired type:\n\nResponse:"}}}

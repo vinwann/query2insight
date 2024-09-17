@@ -29,7 +29,7 @@ can chat_interface(query_walker:walker,session:node){
             st.markdown(message["content"]);
         }
     }
-    if input := st.chat_input("What is up?") {
+    if input := st.chat_input("How can I help you?") {
         query_walker.inquiry_by_user = input;
         #query_walker.user_query.append({  "role": "user", "content": query_walker.query});
         with st.chat_message("user"){

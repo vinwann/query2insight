@@ -18,30 +18,6 @@ glob RagEngine: rag_engine = rag_engine();
 
 glob assitant_type: string = "programming assiatant";
 
-can main() {
-    :g: state ;
-    
-    if (gui.start()) {
-        state = 1;
-    }
-    if (state == 0) {
-        with open('user_info.json', 'r') as f {
-            imported_data = json.load(f);
-        }
-        create_graph(
-            user_data=imported_data['user_data'],
-            todo_list=imported_data['todo_list']
-        ) spawn root;
-        state = 2;
-        chat() spawn [root-->](`?user)[0];
-    } elif (state == 1) {
-        chat() spawn [root-->](`?user)[0];
-        state = 2;
-    } else {
-        query() spawn [[root-->](`?user)[0]-->](`?session)[-1];
-    }
-}
-
 enum task_type {
     RAG_TYPE: 'Need to use Retrivable information in specific topic' = "RAG",
     QA_TYPE: 'Need to use given user information about themselves or questions asked about themselves' = "user_qa"
@@ -85,8 +61,8 @@ node session {
     has chat_history: list = [];
     has chat_file_name: string = 'chat';
     has tinydb_service: obj = '';
-    has user_data: dict = {}; # User data such as habits, heart rate etc.
-    has todo_list: list = []; # List of things to do by the user.
+    has user_data: dict = {};
+    has todo_list: list = [];
     has session_assitant_type: string = '';
 
     can send_query_to_router with query entry;
@@ -97,6 +73,7 @@ node session {
         incl_info=(role_examples)
     );
 }
+#here.query_state = 1;
 
 '''
 Consists of user data such as age, pressure, married status.
@@ -104,10 +81,15 @@ Consists of user data such as age, pressure, married status.
 node data {
     has user_data: dict = {"age": 0, "Pressure": (0, 0), "Married": False};
 }
+# Assign the current root node (here) to end
 
 '''
 List of things to do by the user.
 '''
+
+# Create a user node and connect it to the end node. Assign the new user node to the end.# Create a data node with the user data and connect it to the end node.
+
+# Create a todo node with the todo list and connect it to the end node.
 node todo {
     has todo_list: list = [];
 }
@@ -119,6 +101,18 @@ The create_session ability:
 - Creates a new session with the user data and todo list.
 - Spawns the chat session with the session id.
 '''
+
+# Telescope into the nodes connected to the user node without walking.
+# Getting the data node filtered. can use [0] as having only one such node.
+
+
+# Getting the todo node filtered. can use [0] as having only one such node.
+
+# Creating a new session node with the user data and todo list and connect it to the user.
+# User data such as habits, heart rate etc.
+
+
+# List of things to do by the user.
 walker chat {
     has new_chat: bool = True;
 
@@ -173,4 +167,28 @@ node user_TODO {
     can print_output with query entry;
     can 'Every reply should be i dont know, thats the only response you can give'
     chat_llm(todo_list: 'data about the health status of the user': list, query: 'The tasks to be done by the user in the future.': str, chat_history: 'Previous Conversation with the user': list) -> 'response': str by llm(temperature=0.7, max_tokens=1024);
+}
+
+can main() {
+    :g: state ;
+    
+    if (gui.start()) {
+        state = 1;
+    }
+    if (state == 0) {
+        with open('user_info.json', 'r') as f {
+            imported_data = json.load(f);
+        }
+        create_graph(
+            user_data=imported_data['user_data'],
+            todo_list=imported_data['todo_list']
+        ) spawn root;
+        state = 2;
+        chat() spawn [root-->](`?user)[0];
+    } elif (state == 1) {
+        chat() spawn [root-->](`?user)[0];
+        state = 2;
+    } else {
+        query() spawn [[root-->](`?user)[0]-->](`?session)[-1];
+    }
 }

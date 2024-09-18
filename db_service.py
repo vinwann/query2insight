@@ -40,3 +40,10 @@ class TinyDBService:
         except Exception as e:
             print(f"Error retrieving records: {e}")
             return []
+    def return_all_chats(self):
+        try:
+            records = self.db.all()
+            return records
+        except Exception as e:
+            print(f"Error retrieving records: {e}")
+            return []

@@ -72,6 +72,8 @@ node session {
         max_tokens=1024,
         incl_info=(role_examples)
     );
+    can 'You a smart assitant that has to pick a name for a chat an user has had. Looking at the chat history suggest a name for the chat. The name has to be short '
+    chat_name_suggestion(chat_history: 'The chat history.': list) -> 'response': str by llm(temperature=1);
 }
 #here.query_state = 1;
 

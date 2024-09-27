@@ -1,4 +1,5 @@
 from tinydb import TinyDB
+from tinydb import Query
 import os
 
 class TinyDBService:
@@ -47,3 +48,26 @@ class TinyDBService:
         except Exception as e:
             print(f"Error retrieving records: {e}")
             return []
+        
+    def add_name_by_id(self, id, name):
+        """Updates a session's record by adding a name based on the chat ID."""
+        try:
+            # Search for the record that contains the matching 'id'
+            session = Query()
+            result = self.db.search(session.id == id)
+            
+            if not result:
+                print(f"No session found with id: {id}")
+                return False
+
+            # Assuming you only want to update the first matching record
+            record_id = result[0].doc_id  # Get the internal doc_id to update it
+
+            # Update the record with the 'name' field
+            self.db.update({'name': name}, doc_ids=[record_id])
+
+            return True
+        except Exception as e:
+            print(f"Error updating record: {e}")
+            return False
+        

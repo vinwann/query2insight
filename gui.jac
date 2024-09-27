@@ -32,12 +32,11 @@ can start() {
         return True;
     }
     st.sidebar.subheader("Previous Chats");
-    print(chat_meta_db.return_all_chats());
-    
-    for chat_id in chat_meta_db.return_all_chats()
-    {
-        if (st.sidebar.button(f"Chat {chat_id['id']}", key=f"btn_{chat_id['id']}"))
-        {
+    for chat_id in chat_meta_db.return_all_chats() {
+        if (st.sidebar.button(
+            f"Chat {chat_id['id']}",
+            key=f"btn_{chat_id['id']}"
+        )) {
             return True;
         }
     }

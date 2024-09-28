@@ -88,10 +88,6 @@ node data {
 '''
 List of things to do by the user.
 '''
-
-# Create a user node and connect it to the end node. Assign the new user node to the end.# Create a data node with the user data and connect it to the end node.
-
-# Create a todo node with the todo list and connect it to the end node.
 node todo {
     has todo_list: list = [];
 }
@@ -103,16 +99,6 @@ The create_session ability:
 - Creates a new session with the user data and todo list.
 - Spawns the chat session with the session id.
 '''
-
-# Telescope into the nodes connected to the user node without walking.
-# Getting the data node filtered. can use [0] as having only one such node.
-
-
-# Getting the todo node filtered. can use [0] as having only one such node.
-
-# Creating a new session node with the user data and todo list and connect it to the user.
-# User data such as habits, heart rate etc.
-
 
 # List of things to do by the user.
 walker chat {

@@ -71,3 +71,21 @@ class TinyDBService:
             print(f"Error updating record: {e}")
             return False
         
+    def get_element_number_and_total(self, session_id):
+        """Returns the session number for the given session id and the total number of elements."""
+        try:
+            # Get all records
+            all_records = self.db.all()
+
+            # Iterate over all records and find the one with the matching session id
+            for i, record in enumerate(all_records, start=1):
+                if record.get("id") == session_id:
+                    # Return the session number (as a string) and the total number of elements
+                    return str(i), len(all_records)
+
+            # If no match is found, return None and the total number of elements
+            return None, len(all_records)
+
+        except Exception as e:
+            print(f"Error retrieving records: {e}")
+            return None, 0

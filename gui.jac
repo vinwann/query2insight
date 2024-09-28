@@ -34,10 +34,10 @@ can start() {
     st.sidebar.subheader("Previous Chats");
     for chat_id in chat_meta_db.return_all_chats() {
         if (st.sidebar.button(
-            f"Chat {chat_id['id']}",
+            f"{chat_id['name']}",
             key=f"btn_{chat_id['id']}"
         )) {
-            return True;
+            return chat_id['id'];
         }
     }
     return False;

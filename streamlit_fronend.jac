@@ -63,6 +63,7 @@ node session {
     has tinydb_service: obj = '';
     has user_data: dict = {};
     has todo_list: list = [];
+    has chat_name: string ="";
     has session_assitant_type: string = '';
 
     can send_query_to_router with query entry;
@@ -72,8 +73,8 @@ node session {
         max_tokens=1024,
         incl_info=(role_examples)
     );
-    can 'You a smart assitant that has to pick a name for a chat an user has had. Looking at the chat history suggest a name for the chat. The name has to be short '
-    chat_name_suggestion(chat_history: 'The chat history.': list) -> 'response': str by llm(temperature=1);
+    can 'You a smart assitant that has to pick a name for a chat an user has had. Looking at the chat history suggest a name for the chat and the previous name recommned by you. The name has to be shortand capture the entire conversation'
+    chat_name_suggestion(chat_history: 'The chat history': list,chat_name: 'The previous chat name suggested':str) -> 'response': str by llm(temperature=1);
 }
 #here.query_state = 1;
 
@@ -159,8 +160,8 @@ node user_TODO {
 
 can main() {
     :g: state ;
-    
-    if (gui.start()) {
+    glob gui_return = gui.start();
+    if (gui_return) {
         state = 1;
     }
     if (state == 0) {

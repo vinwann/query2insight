@@ -1,7 +1,9 @@
 import:py streamlit as st;
 import:py from PIL, Image;
 import:py from db_service, TinyDBService;
+import:py pathlib;
 import:py os;
+
 glob chat_meta_db = TinyDBService('meta');
 
 can start() {
@@ -28,22 +30,30 @@ can start() {
             """    """,
         unsafe_allow_html=True
     );
+    start_new_chat = False;
     if st.sidebar.button('start new chat') {
-        #connect_data_source = st.sidebar.checkbox("Connect a data source");
-        #if (connect_data_source) {
-            folder_path = st.sidebar.text_input("Enter folder path:");
-            if (st.sidebar.button("Select Folder")) {
-                if (os.path.isdir(folder_path)) {
-                    selected_folder = folder_path;
-                    st.sidebar.success(f"Folder selected: {folder_path}");
-                } else {
-                    st.sidebar.error(
-                        "Invalid folder path. Please enter a valid directory."
-                    );
-                }
-            }
-        #}
-        return folder_path;
+        start_new_chat = True;
+    }
+    uploaded_file = st.sidebar.file_uploader("Choose a file");
+    if (uploaded_file != None)
+    {
+        st.sidebar.write("File uploaded successfully!");
+        save_path = "uploaded_files";
+        if (os.path.exists(save_path) != True) {
+            os.mkdir(save_path);
+        }
+        file_path = save_path + "/" + uploaded_file.name;
+        try 
+        {
+            with  open(file_path, "wb") as f
+            {
+                f.write(uploaded_file.getbuffer());
+            };
+            st.sidebar.write(f"File saved successfully at: {file_path}");
+        }
+        except Exception as e {
+            st.sidebar.write(f"Error: {e}");
+        }
     }
     st.sidebar.subheader("Previous Chats");
     for chat_id in chat_meta_db.return_all_chats() {
@@ -54,7 +64,8 @@ can start() {
             return chat_id['id'];
         }
     }
-    return False;
+    return start_new_chat;
+    
 }
 
 can chat_interface(query_walker: walker, session: node) {

@@ -168,13 +168,14 @@ can main() {
     :g: chat_type ;
     
     feedback_from_gui = gui.start();
-    if (feedback_from_gui == True) {
+    print(feedback_from_gui);
+    if (type(feedback_from_gui) == list
+        and feedback_from_gui[0] == True) {
         state = 1;
     } elif (type(feedback_from_gui) == str) {
         values = chat_meta_db.get_element_number_and_total(
             feedback_from_gui
         );
-        print(values);
         if (values[0] != None) {
             chat_type = values[0] - 1;
         }

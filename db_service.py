@@ -1,8 +1,9 @@
-from tinydb import TinyDB
-from tinydb import Query
+from tinydb import TinyDB, Query
+from datetime import datetime
 import os
-
 class TinyDBService:
+
+
     def __init__(self, db_file_name=None):
         if db_file_name is None:
             db_file_name = "default_db"
@@ -17,6 +18,7 @@ class TinyDBService:
         """Creates and returns a TinyDB instance."""
         try:
             db = TinyDB(self.db_file)
+            self.metadata_table = self.db.table("metadata")
             return db
         except Exception as e:
             print(f"Error creating database: {e}")
@@ -89,3 +91,22 @@ class TinyDBService:
         except Exception as e:
             print(f"Error retrieving records: {e}")
             return [None, 0]
+    def update_last_updated_time(self, timestamp):
+        """Updates the 'last updated time' in the metadata table with a provided timestamp."""
+        try:
+            # Store the provided timestamp in ISO format in the metadata table
+            self.metadata_table.upsert({'key': 'last_updated_time', 'value': timestamp}, Query().key == 'last_updated_time')
+        except Exception as e:
+            print(f"Error updating last updated time: {e}")
+
+    def get_last_updated_time(self):
+        """Retrieves the 'last updated time' from the metadata table."""
+        try:
+            result = self.metadata_table.get(Query().key == 'last_updated_time')
+            if result:
+                return result['value']
+            else:
+                return None
+        except Exception as e:
+            print(f"Error retrieving last updated time: {e}")
+            return None

@@ -86,7 +86,6 @@ Consists of user data such as age, pressure, married status.
 node data {
     has user_data: dict = {"age": 0, "Pressure": (0, 0), "Married": False};
 }
-# Assign the current root node (here) to end
 
 '''
 List of things to do by the user.

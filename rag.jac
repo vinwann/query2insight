@@ -25,6 +25,20 @@ obj rag_engine {
 
     can load_documents {
         document_loader = PyPDFDirectoryLoader(self.folder_path);
+=======
+
+obj rag_engine {
+    has file_path: str = "books";
+    has chroma_path: str = "chroma";
+
+    can postinit {
+        documents: list = self.load_documents();
+        chunks: list = self.split_documents(documents);
+        self.add_to_chroma(chunks);
+    }
+
+    can load_documents {
+        document_loader = PyPDFDirectoryLoader(self.file_path);
         return document_loader.load();
     }
 

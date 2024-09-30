@@ -60,7 +60,7 @@ can start() {
             }
             except Exception as e {
                 st.sidebar.write(f"Error: {e}");
-            }s
+            }
         }
         st.sidebar.subheader("Previous Chats");
         for chat_id in chat_meta_db.return_all_chats() {

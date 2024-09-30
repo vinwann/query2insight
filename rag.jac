@@ -4,6 +4,28 @@ import:py from langchain.schema.document, Document;
 import:py from langchain_community.embeddings.ollama, OllamaEmbeddings;
 import:py from langchain_community.vectorstores.chroma, Chroma;
 import:py os;
+import:py time;
+import:py from findLastUpdatedTimeService, FileUpdateChecker;
+
+obj rag_engine {
+    has folder_path: str = "uploaded_files";
+    has chroma_path: str = "chroma";
+
+    can postinit {
+        file_checker = FileUpdateChecker(self.folder_path);
+        updated = file_checker.has_updated_files();
+        print("updated ",updated);
+        if (updated) {
+            documents: list = self.load_documents();
+            print("documents",documents);
+            chunks: list = self.split_documents(documents);
+            self.add_to_chroma(chunks);
+        }
+    }
+
+    can load_documents {
+        document_loader = PyPDFDirectoryLoader(self.folder_path);
+=======
 
 obj rag_engine {
     has file_path: str = "books";

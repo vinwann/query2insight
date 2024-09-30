@@ -18,6 +18,8 @@ glob RagEngine: rag_engine = rag_engine();
 
 glob assitant_type: string = "programming assiatant";
 
+glob chat_type = -1;
+
 enum task_type {
     RAG_TYPE: 'Need to use Retrivable information in specific topic' = "RAG",
     QA_TYPE: 'Need to use given user information about themselves or questions asked about themselves' = "user_qa"
@@ -63,6 +65,7 @@ node session {
     has tinydb_service: obj = '';
     has user_data: dict = {};
     has todo_list: list = [];
+    has chat_name: string = "";
     has session_assitant_type: string = '';
 
     can send_query_to_router with query entry;
@@ -72,6 +75,8 @@ node session {
         max_tokens=1024,
         incl_info=(role_examples)
     );
+    can 'You a smart assitant that has to pick a name for a chat an user has had. Looking at the chat history suggest a name for the chat and the previous name recommned by you. The name has to be shortand capture the entire conversation'
+    chat_name_suggestion(chat_history: 'The chat history': list, chat_name: 'The previous chat name suggested': str) -> 'response': str by llm(temperature=1);
 }
 #here.query_state = 1;
 
@@ -157,8 +162,33 @@ node user_TODO {
 can main() {
     :g: state ;
     
-    if (gui.start()) {
+    :g: chat_meta_db ;
+    
+    :g: chat_type ;
+    
+    feedback_from_gui = gui.start();
+    print("feedback_from_gui",feedback_from_gui);
+    if (type(feedback_from_gui) == bool
+        and feedback_from_gui == True) {
         state = 1;
+    } elif (type(feedback_from_gui) == str) 
+    {
+        if (feedback_from_gui == "new upload")
+        {
+            documents: list = RagEngine.load_documents();
+            chunks: list = RagEngine.split_documents(documents);
+            RagEngine.add_to_chroma(chunks);
+        }
+        else 
+        {
+            values = chat_meta_db.get_element_number_and_total(
+            feedback_from_gui
+            );
+            if (values[0] != None) {
+                chat_type = values[0] - 1;
+            }
+        }
+        
     }
     if (state == 0) {
         with open('user_info.json', 'r') as f {
@@ -169,11 +199,14 @@ can main() {
             todo_list=imported_data['todo_list']
         ) spawn root;
         state = 2;
+        chat_type = -1;
         chat() spawn [root-->](`?user)[0];
     } elif (state == 1) {
         chat() spawn [root-->](`?user)[0];
         state = 2;
+        chat_type = -1;
     } else {
-        query() spawn [[root-->](`?user)[0]-->](`?session)[-1];
+        print("chat type", chat_type);
+        query() spawn [[root-->](`?user)[0]-->](`?session)[chat_type];
     }
 }

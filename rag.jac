@@ -8,7 +8,7 @@ import:py time;
 import:py from findLastUpdatedTimeService, FileUpdateChecker;
 
 obj rag_engine {
-    has folder_path: str = "books";
+    has folder_path: str = "uploaded_files";
     has chroma_path: str = "chroma";
 
     can postinit {
@@ -17,6 +17,7 @@ obj rag_engine {
         print("updated ",updated);
         if (updated) {
             documents: list = self.load_documents();
+            print("documents",documents);
             chunks: list = self.split_documents(documents);
             self.add_to_chroma(chunks);
         }

@@ -18,7 +18,7 @@ class TinyDBService:
         """Creates and returns a TinyDB instance."""
         try:
             db = TinyDB(self.db_file)
-            self.metadata_table = self.db.table("metadata")
+            self.metadata_table = db.table("metadata")
             return db
         except Exception as e:
             print(f"Error creating database: {e}")

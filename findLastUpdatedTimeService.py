@@ -20,12 +20,12 @@ class FileUpdateChecker:
             except ValueError:
                 print(f"Error parsing last updated time: {last_updated_time_str}")
                 # If parsing fails, set the current time and update the database
-                self.last_checked = time.time()
-                self.dbService.update_last_updated_time(datetime.fromtimestamp(self.last_checked).isoformat())
+                self.last_checked = None
+                #self.dbService.update_last_updated_time(datetime.fromtimestamp(self.last_checked).isoformat())
         else:
             # If no last updated time exists, set the current time and update the database
-            self.last_checked = time.time()
-            self.dbService.update_last_updated_time(datetime.fromtimestamp(self.last_checked).isoformat())
+            self.last_checked = None
+            #self.dbService.update_last_updated_time(datetime.fromtimestamp(self.last_checked).isoformat())
 
         # Get the initial file modification times
         self.file_mod_times = self.get_file_mod_times()
@@ -43,6 +43,8 @@ class FileUpdateChecker:
 
     def has_updated_files(self):
         """Check if any file has been updated since the last update."""
+        if self.last_checked == None:
+            return True
         current_mod_times = self.get_file_mod_times()
         for file_path, mod_time in current_mod_times.items():
             print(file_path, " ", mod_time, " ", self.last_checked)
@@ -51,7 +53,7 @@ class FileUpdateChecker:
                 self.last_checked = time.time()  # Update last checked time
 
                 # Persist the last checked time in the database
-                self.dbService.update_last_updated_time()
+                self.dbService.update_last_updated_time(datetime.fromtimestamp(self.last_checked).isoformat())
 
                 self.file_mod_times = current_mod_times
                 print("returning true")

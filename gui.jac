@@ -4,11 +4,13 @@ import:py from db_service, TinyDBService;
 import:py pathlib;
 import:py os;
 
-
 glob chat_meta_db = TinyDBService('meta');
+
 glob page = "chat";
+
 can start() {
-    :g: page;
+    :g: page ;
+    
     st.set_page_config(
         page_title="q2i",
         page_icon="🤖",
@@ -33,32 +35,29 @@ can start() {
         unsafe_allow_html=True
     );
     start_new_chat = False;
-    page = st.sidebar.radio("Go to", ["chat", "details"])
-    if (page == "chat")
-    {
-
-
-        if st.sidebar.button('start new chat') {
+    page = st.sidebar.radio("Go to", ["Chat", "Details"]);
+    if (page == "Chat") {
+        if st.sidebar.button('Start new chat') {
             start_new_chat = True;
         }
         uploaded_file = st.sidebar.file_uploader("Choose a file");
-        if (uploaded_file != None)
-        {
-            st.sidebar.write("File uploaded successfully!");
+        if (uploaded_file != None) {
+            
             save_path = "uploaded_files";
             if (os.path.exists(save_path) != True) {
                 os.mkdir(save_path);
             }
             file_path = save_path + "/" + uploaded_file.name;
-            try 
-            {
-                with  open(file_path, "wb") as f
-                {
+            
+            try  {
+                with open(file_path, "wb") as f {
                     f.write(uploaded_file.getbuffer());
-                };
-                st.sidebar.write(f"File saved successfully at: {file_path}");
-            }
-            except Exception as e {
+                }
+                ;    st.sidebar.write(
+                    f"File saved successfully at: {file_path}"
+                );
+                start_new_chat =  "new upload";
+            } except Exception as e {
                 st.sidebar.write(f"Error: {e}");
             }
         }
@@ -68,20 +67,21 @@ can start() {
                 f"{chat_id['name']}",
                 key=f"btn_{chat_id['id']}"
             )) {
-                return chat_id['id'];
+                start_new_chat =  chat_id['id'];
             }
         }
         return start_new_chat;
+    } else {
+        user_data();
     }
-    else{
-        pass;
-    }
-    
+}
+
+can user_data() {
+    st.write(f"Under development");
 }
 
 can chat_interface(query_walker: walker, session: node) {
-    if (page == "chat")
-    {
+    if (page == "Chat") {
         for message in session.chat_history {
             with st.chat_message(message["role"]) {
                 st.markdown(message["content"]);
@@ -99,8 +99,7 @@ can chat_interface(query_walker: walker, session: node) {
 }
 
 can display_response(response: str) {
-    if (page == "chat")
-    {
+    if (page == "Chat") {
         with st.chat_message("assistant") {
             stream = st.write(response);
         }

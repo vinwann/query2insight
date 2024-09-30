@@ -168,17 +168,28 @@ can main() {
     :g: chat_type ;
     
     feedback_from_gui = gui.start();
-    print(feedback_from_gui);
-    if (type(feedback_from_gui) == list
-        and feedback_from_gui[0] == True) {
+    print("feedback_from_gui",feedback_from_gui);
+    if (type(feedback_from_gui) == bool
+        and feedback_from_gui == True) {
         state = 1;
-    } elif (type(feedback_from_gui) == str) {
-        values = chat_meta_db.get_element_number_and_total(
-            feedback_from_gui
-        );
-        if (values[0] != None) {
-            chat_type = values[0] - 1;
+    } elif (type(feedback_from_gui) == str) 
+    {
+        if (feedback_from_gui == "new upload")
+        {
+            documents: list = RagEngine.load_documents();
+            chunks: list = RagEngine.split_documents(documents);
+            RagEngine.add_to_chroma(chunks);
         }
+        else 
+        {
+            values = chat_meta_db.get_element_number_and_total(
+            feedback_from_gui
+            );
+            if (values[0] != None) {
+                chat_type = values[0] - 1;
+            }
+        }
+        
     }
     if (state == 0) {
         with open('user_info.json', 'r') as f {
@@ -196,6 +207,7 @@ can main() {
         state = 2;
         chat_type = -1;
     } else {
+        print("chat type", chat_type);
         query() spawn [[root-->](`?user)[0]-->](`?session)[chat_type];
     }
 }

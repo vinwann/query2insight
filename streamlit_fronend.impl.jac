@@ -45,6 +45,7 @@
 
 :node:session:can:send_query_to_router {
     :g: chat_meta_db ;
+    print(self.session_id);
     if (here.just_init) {
         here.just_init = False;
         gui.chat_interface(here, self);
@@ -133,7 +134,7 @@
             todo_list=todo_node.todo_list,
             tinydb_service=TinyDBService('chat' + new_session_id)
         );
-        chat_meta_db.insert_data({"id": 'chat' + new_session_id,"name":""});
+        chat_meta_db.insert_data({"id": 'chat' + new_session_id,"name":"New chat"});
         visit n;
     }
 }

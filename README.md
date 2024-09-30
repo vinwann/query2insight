@@ -26,7 +26,7 @@
 ![ui](https://github.com/user-attachments/assets/43f19ed9-cd85-440c-b16e-bad94903ee71)
 
 
-https://github.com/user-attachments/assets/03be5b37-e971-4287-8084-93893323c021
+https://github.com/user-attachments/assets/e5065d8f-5ada-451c-9e31-35fca53ad159
 
 <p><strong>Data spatial architecture</strong></p>
 

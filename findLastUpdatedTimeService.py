@@ -6,20 +6,20 @@ from db_service import TinyDBService
 class FileUpdateChecker:
     def __init__(self, folder_name):
         self.folder_path = os.path.join(os.getcwd(), folder_name)
-
-        # Initialize TinyDBService for metadata handling
+        if not os.path.exists(self.folder_path):
+            os.makedirs(self.folder_path)
         self.dbService = TinyDBService('meta')
         last_updated_time_str = self.dbService.get_last_updated_time()
         print("last_updated_time_str:", last_updated_time_str)
 
-        # Parse last updated time from the database or use the current time
+ 
         if last_updated_time_str:
             try:
-                # Parse ISO string to datetime and convert to timestamp
+             
                 self.last_checked = datetime.fromisoformat(last_updated_time_str).timestamp()
             except ValueError:
                 print(f"Error parsing last updated time: {last_updated_time_str}")
-                # If parsing fails, set the current time and update the database
+    
                 self.last_checked = None
                 #self.dbService.update_last_updated_time(datetime.fromtimestamp(self.last_checked).isoformat())
         else:

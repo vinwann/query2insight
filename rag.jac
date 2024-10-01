@@ -14,10 +14,13 @@ obj rag_engine {
     can postinit {
         file_checker = FileUpdateChecker(self.folder_path);
         updated = file_checker.has_updated_files();
-        print("updated ",updated);
+        self.chroma_folder_path = os.path.join(os.getcwd(), self.chroma_path);
+        if (not os.path.exists(self.chroma_folder_path)) {
+            os.makedirs(self.chroma_folder_path);
+        }
         if (updated) {
             documents: list = self.load_documents();
-            print("documents",documents);
+            print("documents", documents);
             chunks: list = self.split_documents(documents);
             self.add_to_chroma(chunks);
         }
@@ -25,20 +28,6 @@ obj rag_engine {
 
     can load_documents {
         document_loader = PyPDFDirectoryLoader(self.folder_path);
-=======
-
-obj rag_engine {
-    has file_path: str = "books";
-    has chroma_path: str = "chroma";
-
-    can postinit {
-        documents: list = self.load_documents();
-        chunks: list = self.split_documents(documents);
-        self.add_to_chroma(chunks);
-    }
-
-    can load_documents {
-        document_loader = PyPDFDirectoryLoader(self.file_path);
         return document_loader.load();
     }
 

@@ -1,0 +1,11 @@
+# Ignore generated Jac files and cache
+__jac_gen__/
+__pycache__/
+.jac_mypy_cache/
+
+# Ignore database and uploaded files
+db/
+uploaded_files/
+chroma/
+meta.json/
+

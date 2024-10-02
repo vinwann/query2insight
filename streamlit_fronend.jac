@@ -20,6 +20,8 @@ glob assitant_type: string = "programming assiatant";
 
 glob chat_type = -1;
 
+glob current_session_id = None;
+
 enum task_type {
     RAG_TYPE: 'Need to use Retrivable information in specific topic' = "RAG",
     QA_TYPE: 'Need to use given user information about themselves or questions asked about themselves' = "user_qa"
@@ -207,6 +209,6 @@ can main() {
         chat_type = -1;
     } else {
         print("chat type", chat_type);
-        query() spawn [[root-->](`?user)[0]-->](`?session)[chat_type];
+        query() spawn [[root-->](`?user)[0]-->](`?session)(session_id=);
     }
 }

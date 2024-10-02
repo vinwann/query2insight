@@ -20,7 +20,15 @@ glob assitant_type: string = "programming assiatant";
 
 glob chat_type = -1;
 
-glob current_session_id = None;
+glob current_session_id: str;
+
+enum app_states {
+    BOOT_UP = "boot up",
+    RUNNING = "running",
+    NEW = "new chat"
+}
+
+glob app_state = app_states.BOOT_UP;
 
 enum task_type {
     RAG_TYPE: 'Need to use Retrivable information in specific topic' = "RAG",
@@ -107,7 +115,6 @@ The create_session ability:
 # List of things to do by the user.
 walker chat {
     has new_chat: bool = True;
-
     can create_session with user entry;
     can chat_session with session entry;
 }
@@ -167,32 +174,25 @@ can main() {
     :g: chat_meta_db ;
     
     :g: chat_type ;
+
+    :g: app_state ;
     
+    :g: current_session_id;
+
     feedback_from_gui = gui.start();
-    print("feedback_from_gui",feedback_from_gui);
     if (type(feedback_from_gui) == bool
         and feedback_from_gui == True) {
-        state = 1;
-    } elif (type(feedback_from_gui) == str) 
-    {
-        if (feedback_from_gui == "new upload")
-        {
+        app_state = app_states.NEW;
+    } elif (type(feedback_from_gui) == str) {
+        if (feedback_from_gui == "new upload") {
             documents: list = RagEngine.load_documents();
             chunks: list = RagEngine.split_documents(documents);
             RagEngine.add_to_chroma(chunks);
+        } else {
+            current_session_id = feedback_from_gui;
         }
-        else 
-        {
-            values = chat_meta_db.get_element_number_and_total(
-            feedback_from_gui
-            );
-            if (values[0] != None) {
-                chat_type = values[0] - 1;
-            }
-        }
-        
     }
-    if (state == 0) {
+    if (app_state == app_states.BOOT_UP) {
         with open('user_info.json', 'r') as f {
             imported_data = json.load(f);
         }
@@ -200,15 +200,24 @@ can main() {
             user_data=imported_data['user_data'],
             todo_list=imported_data['todo_list']
         ) spawn root;
-        state = 2;
+        #state = 2;
         chat_type = -1;
         chat() spawn [root-->](`?user)[0];
-    } elif (state == 1) {
+    } elif (app_state == app_states.NEW) {
         chat() spawn [root-->](`?user)[0];
         state = 2;
         chat_type = -1;
     } else {
-        print("chat type", chat_type);
-        query() spawn [[root-->](`?user)[0]-->](`?session)(session_id=);
+        count:int = 0;
+        for i in [[root-->](`?user)[0]-->](`?session)
+        {
+            if i.session_id == current_session_id 
+            {
+                break;
+            }
+            count += 1;
+        }
+
+        query() spawn [[root-->](`?user)[0]-->](`?session)[count];
     }
 }

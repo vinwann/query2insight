@@ -12,16 +12,21 @@ class TinyDBService:
         if not os.path.exists("db"):
             os.makedirs("db")
 
-        self.db = self.create_db()
+        self.db = self.connect_or_create_db()
 
-    def create_db(self):
-        """Creates and returns a TinyDB instance."""
+    def connect_or_create_db(self):
+        """Connects to the existing database or creates a new one if it doesn't exist."""
         try:
+            if os.path.exists(self.db_file):
+                print(f"Connecting to existing database: {self.db_file}")
+            else:
+                print(f"Creating new database: {self.db_file}")
+
             db = TinyDB(self.db_file)
             self.metadata_table = db.table("metadata")
             return db
         except Exception as e:
-            print(f"Error creating database: {e}")
+            print(f"Error connecting to or creating database: {e}")
             return None
 
     def insert_data(self, data):

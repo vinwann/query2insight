@@ -20,12 +20,10 @@ obj rag_engine {
         }
         if (updated) {
             documents: list = self.load_documents();
-            print("documents", documents);
             chunks: list = self.split_documents(documents);
             self.add_to_chroma(chunks);
         }
     }
-
     can load_documents {
         document_loader = PyPDFDirectoryLoader(self.folder_path);
         return document_loader.load();
@@ -92,6 +90,7 @@ obj rag_engine {
             print('adding new documents');
             new_chunk_ids = [chunk.metadata['id'] for chunk in new_chunks];
             db.add_documents(new_chunks, ids=new_chunk_ids);
+            print("Done");
         } else {
             print('no new documents to add');
         }

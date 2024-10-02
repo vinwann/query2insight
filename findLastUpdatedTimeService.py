@@ -44,6 +44,8 @@ class FileUpdateChecker:
     def has_updated_files(self):
         """Check if any file has been updated since the last update."""
         if self.last_checked == None:
+            self.last_checked = time.time()
+            self.dbService.update_last_updated_time(datetime.fromtimestamp(self.last_checked).isoformat())
             return True
         current_mod_times = self.get_file_mod_times()
         for file_path, mod_time in current_mod_times.items():

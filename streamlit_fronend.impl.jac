@@ -1,5 +1,5 @@
 :node:RAG:can:print_output {
-    tinydb_service = TinyDBService('chat' + here.session_id);
+    tinydb_service = TinyDBService(here.session_id);
     self.answer = self.chat_llm(
         assistant_type=here.session_assitant_type,
         query=here.inquiry_by_user,
@@ -14,9 +14,10 @@
 }
 
 :node:user_QA:can:print_output {
-    tinydb_service = TinyDBService('chat' + here.session_id);
+    tinydb_service = TinyDBService(here.session_id);
     
     #print(tinydb_service.return_chat_history());
+    #response (str) = "Hello, welcome to our health assistant. How can I assist you today?"
     self.answer = self.chat_llm(
         user_data=here.user_data,
         query=here.inquiry_by_user,
@@ -30,7 +31,7 @@
 }
 
 :node:user_TODO:can:print_output {
-    tinydb_service = TinyDBService('chat' + here.session_id);
+    tinydb_service = TinyDBService(here.session_id);
     self.answer = self.chat_llm(
         todo_list=here.todo_list,
         query=here.inquiry_by_user,
@@ -45,7 +46,8 @@
 
 :node:session:can:send_query_to_router {
     :g: chat_meta_db ;
-    print(self.session_id);
+    
+    print("session_id ",self.session_id);
     if (here.just_init) {
         here.just_init = False;
         gui.chat_interface(here, self);
@@ -73,12 +75,14 @@
     } elif (here.query_state == 1) {
         self.chat_history.append(here.user_query);
         self.tinydb_service.insert_data(here.user_query);
-        
         self.chat_name = self.chat_name_suggestion(
-                chat_history=self.tinydb_service.return_chat_history(),
-                chat_name= self.chat_name
-            );
-        chat_meta_db.add_name_by_id("chat"+self.session_id, self.chat_name);
+            chat_history=self.tinydb_service.return_chat_history(),
+            chat_name=self.chat_name
+        );
+        chat_meta_db.add_name_by_id(
+            self.session_id,
+            self.chat_name
+        );
         here.query_state = 2;
     }
 }
@@ -120,11 +124,35 @@
 
 :walker:chat:can:create_session {
     :g: chat_meta_db ;
+
+    :g: app_state ;
     
-    if (self.new_chat) {
+    :g: current_session_id;
+    data_node = [-->](`?data)[0];# Getting the data node filtered. can use [0] as having only one such node.
+    todo_node = [-->](`?todo)[0];# Getting the todo node filtered. can use [0] as having only one such node.
+    if (app_state == app_states.BOOT_UP) {
+        for chat_id in chat_meta_db.return_all_chats() {
+            temp_tinydb_service: obj = TinyDBService(chat_id['id']);
+            session_node = here ++> session(
+                session_id=chat_id['id'],
+                user_data=data_node.user_data,
+                todo_list=todo_node.todo_list,
+                tinydb_service=TinyDBService(chat_id['id']),
+                chat_history=temp_tinydb_service.return_chat_history()
+            );
+            
+            end = session_node;
+            end ++> (end := router());
+            end ++> RAG();
+            end ++> user_QA();
+            end ++> user_TODO();
+        }
+        app_state = app_states.RUNNING;
+        
+    }
+    elif (app_state == app_states.NEW) {
         # Telescope into the nodes connected to the user node without walking.
-        data_node = [-->](`?data)[0];# Getting the data node filtered. can use [0] as having only one such node.
-        todo_node = [-->](`?todo)[0];# Getting the todo node filtered. can use [0] as having only one such node.
+        
         new_session_id = str(uuid.uuid4());
         
         # Creating a new session node with the user data and todo list and connect it to the user.
@@ -132,9 +160,13 @@
             session_id=new_session_id,
             user_data=data_node.user_data,
             todo_list=todo_node.todo_list,
-            tinydb_service=TinyDBService('chat' + new_session_id)
+            tinydb_service=TinyDBService(new_session_id)
         );
-        chat_meta_db.insert_data({"id": 'chat' + new_session_id,"name":"New chat"});
+        chat_meta_db.insert_data(
+            {"id": new_session_id, "name": "New chat"}
+        );
+        app_state = app_states.RUNNING;
+        current_session_id = new_session_id; 
         visit n;
     }
 }

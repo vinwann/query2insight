@@ -42,7 +42,6 @@ can start() {
         }
         uploaded_file = st.sidebar.file_uploader("Choose a file");
         if (uploaded_file != None) {
-            
             save_path = "uploaded_files";
             if (os.path.exists(save_path) != True) {
                 os.mkdir(save_path);
@@ -56,18 +55,18 @@ can start() {
                 ;    st.sidebar.write(
                     f"File saved successfully at: {file_path}"
                 );
-                start_new_chat =  "new upload";
+                start_new_chat = "new upload";
             } except Exception as e {
                 st.sidebar.write(f"Error: {e}");
             }
         }
         st.sidebar.subheader("Previous Chats");
-        for chat_id in chat_meta_db.return_all_chats() {
+        for chat_id in reversed(chat_meta_db.return_all_chats()) {
             if (st.sidebar.button(
                 f"{chat_id['name']}",
                 key=f"btn_{chat_id['id']}"
             )) {
-                start_new_chat =  chat_id['id'];
+                start_new_chat = chat_id['id'];
             }
         }
         return start_new_chat;

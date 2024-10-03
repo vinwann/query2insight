@@ -17,7 +17,15 @@
     tinydb_service = TinyDBService(here.session_id);
     
     #print(tinydb_service.return_chat_history());
+    
+    
     #response (str) = "Hello, welcome to our health assistant. How can I assist you today?"
+    
+    
+    #response = "Hi there, it's nice to meet you. I'm here to help answer any questions you have about your health, medications, or provide general information on various topics. What's on your mind today?"
+    
+    
+    #"response = \"Introduction to Health Assistant\""
     self.answer = self.chat_llm(
         user_data=here.user_data,
         query=here.inquiry_by_user,
@@ -47,7 +55,7 @@
 :node:session:can:send_query_to_router {
     :g: chat_meta_db ;
     
-    print("session_id ",self.session_id);
+    print("session_id ", self.session_id);
     if (here.just_init) {
         here.just_init = False;
         gui.chat_interface(here, self);
@@ -124,10 +132,11 @@
 
 :walker:chat:can:create_session {
     :g: chat_meta_db ;
-
+    
     :g: app_state ;
     
-    :g: current_session_id;
+    :g: current_session_id ;
+    
     data_node = [-->](`?data)[0];# Getting the data node filtered. can use [0] as having only one such node.
     todo_node = [-->](`?todo)[0];# Getting the todo node filtered. can use [0] as having only one such node.
     if (app_state == app_states.BOOT_UP) {
@@ -140,7 +149,6 @@
                 tinydb_service=TinyDBService(chat_id['id']),
                 chat_history=temp_tinydb_service.return_chat_history()
             );
-            
             end = session_node;
             end ++> (end := router());
             end ++> RAG();
@@ -148,12 +156,36 @@
             end ++> user_TODO();
         }
         app_state = app_states.RUNNING;
+    } elif (app_state == app_states.NEW) {
+        # Telescope into the nodes connected to the user node without walking.
+        new_session_id = str(uuid.uuid4());
         
-    }
-    elif (app_state == app_states.NEW) {
+        # Creating a new session node with the user data and todo list and connect it to the user.
+        
+        
+        #here.query_state = 1;
+        
+        
+        # Assign the current root node (here) to end
+        
+        
+        # Create a user node and connect it to the end node. Assign the new user node to the end.
+        
+        
+        # Create a data node with the user data and connect it to the end node.
+        
+        
+        # Create a todo node with the todo list and connect it to the end node.
+        
+        
+        # Getting the data node filtered. can use [0] as having only one such node.
+        
+        
+        # Getting the todo node filtered. can use [0] as having only one such node.
+        
+        
         # Telescope into the nodes connected to the user node without walking.
         
-        new_session_id = str(uuid.uuid4());
         
         # Creating a new session node with the user data and todo list and connect it to the user.
         n = here ++> session(
@@ -166,7 +198,7 @@
             {"id": new_session_id, "name": "New chat"}
         );
         app_state = app_states.RUNNING;
-        current_session_id = new_session_id; 
+        current_session_id = new_session_id;
         visit n;
     }
 }

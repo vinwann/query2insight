@@ -115,6 +115,7 @@ The create_session ability:
 # List of things to do by the user.
 walker chat {
     has new_chat: bool = True;
+
     can create_session with user entry;
     can chat_session with session entry;
 }
@@ -174,11 +175,11 @@ can main() {
     :g: chat_meta_db ;
     
     :g: chat_type ;
-
+    
     :g: app_state ;
     
-    :g: current_session_id;
-
+    :g: current_session_id ;
+    
     feedback_from_gui = gui.start();
     if (type(feedback_from_gui) == bool
         and feedback_from_gui == True) {
@@ -200,6 +201,7 @@ can main() {
             user_data=imported_data['user_data'],
             todo_list=imported_data['todo_list']
         ) spawn root;
+        
         #state = 2;
         chat_type = -1;
         chat() spawn [root-->](`?user)[0];
@@ -208,16 +210,13 @@ can main() {
         state = 2;
         chat_type = -1;
     } else {
-        count:int = 0;
-        for i in [[root-->](`?user)[0]-->](`?session)
-        {
-            if i.session_id == current_session_id 
-            {
+        count: int = 0;
+        for i in [[root-->](`?user)[0]-->](`?session) {
+            if i.session_id == current_session_id {
                 break;
             }
             count += 1;
         }
-
         query() spawn [[root-->](`?user)[0]-->](`?session)[count];
     }
 }

@@ -24,6 +24,9 @@ class TinyDBService:
 
             db = TinyDB(self.db_file)
             self.metadata_table = db.table("metadata")
+            self.api_table = db.table("apidata")
+            self.user_data_table = db.table("user_data")
+            self.tasks_table = db.table("tasks")
             return db
         except Exception as e:
             print(f"Error connecting to or creating database: {e}")
@@ -114,4 +117,112 @@ class TinyDBService:
                 return None
         except Exception as e:
             print(f"Error retrieving last updated time: {e}")
+            return None
+    
+    def update_api_key(self, apiKey):
+        try:
+            # Store the provided timestamp in ISO format in the metadata table
+            self.api_table.upsert({'key': 'api key', 'value': apiKey}, Query().key == 'api key')
+        except Exception as e:
+            print(f"Error updating api key: {e}")
+
+    def get_api_key(self):
+        try:
+            result = self.api_table.get(Query().key == 'api key')
+            if result:
+                return result['value']
+            else:
+                return None
+        except Exception as e:
+            print(f"Error retrieving api key: {e}")
+            return None
+    
+    def add_user_data(self, user_data):
+        """Inserts user data into the user_data table."""
+        try:
+            self.user_data_table.insert(user_data)
+            return True
+        except Exception as e:
+            print(f"Error inserting user data: {e}")
+            return False
+
+    def update_user_data(self, user_id, updates):
+        """Updates user data fields based on user_id."""
+        try:
+            user = Query()
+            result = self.user_data_table.search(user.id == user_id)
+            if not result:
+                print(f"No user found with id: {user_id}")
+                return False
+
+            record_id = result[0].doc_id
+            self.user_data_table.update(updates, doc_ids=[record_id])
+            return True
+        except Exception as e:
+            print(f"Error updating user data: {e}")
+            return False
+
+    def get_user_data(self, user_id):
+        """Retrieves user data by user_id."""
+        try:
+            user = Query()
+            result = self.user_data_table.get(user.id == user_id)
+            if result:
+                return result
+            else:
+                print(f"No user found with id: {user_id}")
+                return None
+        except Exception as e:
+            print(f"Error retrieving user data: {e}")
+            return None
+        
+    # Tasks methods
+
+    def add_task(self, task):
+        """Adds a task to the tasks table."""
+        try:
+            task_datetime = self.extract_task_datetime(task)
+            self.tasks_table.insert({"task": task, "task_datetime": task_datetime})
+            return True
+        except Exception as e:
+            print(f"Error adding task: {e}")
+            return False
+
+    def remove_task(self, task):
+        """Removes a task from the tasks table based on the task description."""
+        try:
+            task_query = Query()
+            result = self.tasks_table.search(task_query.task == task)
+            if result:
+                self.tasks_table.remove(task_query.task == task)
+                return True
+            else:
+                print(f"Task not found: {task}")
+                return False
+        except Exception as e:
+            print(f"Error removing task: {e}")
+            return False
+
+    def get_all_tasks(self):
+        """Returns all tasks ordered by date and time."""
+        try:
+            # Retrieve all tasks
+            tasks = self.tasks_table.all()
+
+            # Sort the tasks by the 'task_datetime' field
+            sorted_tasks = sorted(tasks, key=lambda x: x['task_datetime'])
+            return [task['task'] for task in sorted_tasks]
+        except Exception as e:
+            print(f"Error retrieving tasks: {e}")
+            return []
+
+    def extract_task_datetime(self, task):
+        """Extracts the date and time from the task string and converts it to a datetime object."""
+        try:
+            # Extract the date and time from the task string (assuming it's at the end of the string)
+            date_str = task.split(":")[-1].strip()  # Get the date part
+            task_datetime = datetime.strptime(date_str, "%d/%m/%Y %I:%M %p")
+            return task_datetime
+        except Exception as e:
+            print(f"Error parsing task datetime: {e}")
             return None

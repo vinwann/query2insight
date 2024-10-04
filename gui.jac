@@ -104,15 +104,11 @@ can user_data() {
     }
     new_api_key: str = st.text_input("Groq API Key", api_key);
     if new_api_key != api_key {
-        if verify_groq_api_key(new_api_key)
-        {
+        if verify_groq_api_key(new_api_key) {
             chat_meta_db.update_api_key(new_api_key);
             os.environ["GROQ_API_KEY"] = new_api_key;
-        }
-        else{
-            st.warning(
-                "Please set a vaild Groq api key"
-            );
+        } else {
+            st.warning("Please set a vaild Groq api key");
         }
     }
 }
@@ -143,8 +139,7 @@ can display_response(response: str) {
     }
 }
 
-can verify_groq_api_key(api_key:str) 
-{
+can verify_groq_api_key(api_key: str) {
     url = "https://api.groq.com/openai/v1/chat/completions";
     headers = {
         "Authorization": f"Bearer {api_key}",
@@ -155,22 +150,19 @@ can verify_groq_api_key(api_key:str)
         "messages": [{"role": "user", "content": "Hello"}],
         "max_tokens": 1
     };
-    try
-    {
-        response = requests.post(url, headers=headers, data=json.dumps(payload));
-        if response.status_code == 200
-        {
+    try  {
+        response = requests.post(
+            url,
+            headers=headers, data=json.dumps(payload)
+        );
+        if response.status_code == 200 {
             print("valid api key");
             return True;
-        }
-        else
-        { 
+        } else {
             print("Invalid api key");
             return False;
         }
-    }
-    except Exception as e 
-    {
+    } except Exception as e {
         print("Invalid api key");
         return False;
     }

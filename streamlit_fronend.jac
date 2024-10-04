@@ -12,10 +12,7 @@ glob chat_meta_db = TinyDBService('meta');
 
 glob api_key = None;
 
-glob llm = Groq(
-    model_name="llama-3.1-70b-versatile",
-    api_key= api_key 
-);
+glob llm = None;
 
 glob RagEngine: rag_engine = rag_engine();
 
@@ -181,8 +178,11 @@ can main() {
     
     :g: ready_to_chat ;
     
+    :g: llm ;
+    
     feedback_from_gui = gui.start(ready_to_chat);
-    if (api_key and feedback_from_gui != "user details") {
+    if (api_key
+        and feedback_from_gui != "user details") {
         if (type(feedback_from_gui) == bool
             and feedback_from_gui == True) {
             app_state = app_states.NEW;
@@ -196,6 +196,8 @@ can main() {
             }
         }
         if (app_state == app_states.BOOT_UP) {
+            os.environ["GROQ_API_KEY"] = api_key;
+            llm = Groq(model_name="llama-3.1-70b-versatile");
             with open('user_info.json', 'r') as f {
                 imported_data = json.load(f);
             }

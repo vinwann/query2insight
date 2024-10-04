@@ -13,7 +13,9 @@ class TinyDBService:
             os.makedirs("db")
 
         self.db = self.connect_or_create_db()
-
+        self.initialize_user_data()
+        self.initialize_tasks()
+        
     def connect_or_create_db(self):
         """Connects to the existing database or creates a new one if it doesn't exist."""
         try:
@@ -31,6 +33,47 @@ class TinyDBService:
         except Exception as e:
             print(f"Error connecting to or creating database: {e}")
             return None
+
+    def initialize_user_data(self):
+        """Initializes user_data with default structure if empty."""
+        if len(self.user_data_table) == 0:
+            default_user_data = {
+                "name": "",
+                "age_years": 0,
+                "Gender": "",
+                "Height_cm": 0,
+                "Weight_kg": 0,
+                "Blood_Pressure_mmHg": [],
+                "Married": False,
+                "Alcohol_Intake": "",
+                "Physical_Activity_Level": "",
+                "Cholesterol_Level_mg_dL": 0,
+                "HDL_mg_dL": 0,
+                "LDL_mg_dL": 0,
+                "Triglycerides_mg_dL": 0,
+                "Blood_Glucose_mg_dL": 0,
+                "HbA1c_percent": 0,
+                "Medications": [],
+                "Family_History": {
+                    "Diabetes": False,
+                    "Heart_Disease": False,
+                    "Stroke": False
+                },
+                "Allergies": [],
+                "Last_Checkup_Date": ""
+            }
+            self.user_data_table.insert(default_user_data)
+            print("Initialized user_data with default structure.")
+
+    def initialize_tasks(self):
+        """Initializes tasks with an empty todo_list if empty."""
+        if len(self.tasks_table) == 0:
+            default_tasks = {
+                "todo_list": []
+            }
+            self.tasks_table.insert(default_tasks)
+            print("Initialized tasks with default structure.")
+
 
     def insert_data(self, data):
         if not isinstance(data, dict):

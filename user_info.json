@@ -1,6 +1,6 @@
 {
     "user_data": {
-        "First_name": "Vinura",
+        "name": "Vinura",
         "age_years": 25,
         "Gender": "Male",
         "Height_cm": 180,
@@ -34,16 +34,16 @@
         "Last_Checkup_Date": "2024-08-10"
     },
     "todo_list": [
-    "Monitor blood pressure daily : 04/08/2024 08:15 AM",
-    "Take medication (Metformin, Atorvastatin) : 05/08/2024 07:30 AM",
-    "Schedule cardiology appointment : 10/08/2024 02:00 PM",
-    "Complete blood tests : 15/08/2024 09:45 AM",
-    "Attend diabetes education class : 20/08/2024 11:00 AM",
-    "Follow up with dietitian : 25/08/2024 03:30 PM",
-    "Exercise (30 minutes walk) : 26/08/2024 06:30 AM",
-    "Annual physical checkup : 01/09/2024 10:00 AM",
-    "Renew prescription for medications : 02/09/2024 12:15 PM",
-    "Check cholesterol levels : 05/09/2024 08:00 AM",
-    "Plan weekend getaway : 28/09/2024 04:45 PM"
+        "Monitor blood pressure daily : 04/08/2024 08:15 AM",
+        "Take medication (Metformin, Atorvastatin) : 05/08/2024 07:30 AM",
+        "Schedule cardiology appointment : 10/08/2024 02:00 PM",
+        "Complete blood tests : 15/08/2024 09:45 AM",
+        "Attend diabetes education class : 20/08/2024 11:00 AM",
+        "Follow up with dietitian : 25/08/2024 03:30 PM",
+        "Exercise (30 minutes walk) : 26/08/2024 06:30 AM",
+        "Annual physical checkup : 01/09/2024 10:00 AM",
+        "Renew prescription for medications : 02/09/2024 12:15 PM",
+        "Check cholesterol levels : 05/09/2024 08:00 AM",
+        "Plan weekend getaway : 28/09/2024 04:45 PM"
     ]
 }

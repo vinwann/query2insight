@@ -10,17 +10,17 @@ include:jac rag;
 
 glob chat_meta_db = TinyDBService('meta');
 
-glob llm = Groq(model_name="llama-3.1-70b-versatile");
+glob api_key = None;
 
-glob state = 0;
+glob llm = None;
 
 glob RagEngine: rag_engine = rag_engine();
 
 glob assitant_type: string = "programming assiatant";
 
-glob chat_type = -1;
-
 glob current_session_id: str;
+
+glob ready_to_chat = False;
 
 enum app_states {
     BOOT_UP = "boot up",
@@ -53,7 +53,6 @@ has user_name: string = "user";
 }
 
 walker query {
-    #can go_to_router with session entry;
     has session_id: string = '';
     has just_init: bool = True;
     has inquiry_by_user: string = '';
@@ -88,7 +87,6 @@ node session {
     can 'You a smart assitant that has to pick a name for a chat an user has had. Looking at the chat history suggest a name for the chat and the previous name recommned by you. The name has to be shortand capture the entire conversation'
     chat_name_suggestion(chat_history: 'The chat history': list, chat_name: 'The previous chat name suggested': str) -> 'response': str by llm(temperature=1);
 }
-#here.query_state = 1;
 
 '''
 Consists of user data such as age, pressure, married status.
@@ -170,53 +168,62 @@ node user_TODO {
 }
 
 can main() {
-    :g: state ;
-    
     :g: chat_meta_db ;
-    
-    :g: chat_type ;
     
     :g: app_state ;
     
     :g: current_session_id ;
     
-    feedback_from_gui = gui.start();
-    if (type(feedback_from_gui) == bool
-        and feedback_from_gui == True) {
-        app_state = app_states.NEW;
-    } elif (type(feedback_from_gui) == str) {
-        if (feedback_from_gui == "new upload") {
-            documents: list = RagEngine.load_documents();
-            chunks: list = RagEngine.split_documents(documents);
-            RagEngine.add_to_chroma(chunks);
-        } else {
-            current_session_id = feedback_from_gui;
-        }
-    }
-    if (app_state == app_states.BOOT_UP) {
-        with open('user_info.json', 'r') as f {
-            imported_data = json.load(f);
-        }
-        create_graph(
-            user_data=imported_data['user_data'],
-            todo_list=imported_data['todo_list']
-        ) spawn root;
-        
-        #state = 2;
-        chat_type = -1;
-        chat() spawn [root-->](`?user)[0];
-    } elif (app_state == app_states.NEW) {
-        chat() spawn [root-->](`?user)[0];
-        state = 2;
-        chat_type = -1;
-    } else {
-        count: int = 0;
-        for i in [[root-->](`?user)[0]-->](`?session) {
-            if i.session_id == current_session_id {
-                break;
+    :g: api_key ;
+    
+    :g: ready_to_chat ;
+    
+    :g: llm ;
+    
+    feedback_from_gui = gui.start(ready_to_chat);
+    if (api_key
+        and feedback_from_gui != "user details") {
+        if (type(feedback_from_gui) == bool
+            and feedback_from_gui == True) {
+            app_state = app_states.NEW;
+        } elif (type(feedback_from_gui) == str) {
+            if (feedback_from_gui == "new upload") {
+                documents: list = RagEngine.load_documents();
+                chunks: list = RagEngine.split_documents(documents);
+                RagEngine.add_to_chroma(chunks);
+            } else {
+                current_session_id = feedback_from_gui;
             }
-            count += 1;
         }
-        query() spawn [[root-->](`?user)[0]-->](`?session)[count];
+        if (app_state == app_states.BOOT_UP) {
+            os.environ["GROQ_API_KEY"] = api_key;
+            llm = Groq(model_name="llama-3.1-70b-versatile");
+            with open('user_info.json', 'r') as f {
+                imported_data = json.load(f);
+            }
+            create_graph(
+                user_data=imported_data['user_data'],
+                todo_list=imported_data['todo_list']
+            ) spawn root;
+            chat() spawn [root-->](`?user)[0];
+        } elif (app_state == app_states.NEW) {
+            chat() spawn [root-->](`?user)[0];
+        } else {
+            count: int = 0;
+            for i in [[root-->](`?user)[0]-->](`?session) {
+                if i.session_id == current_session_id {
+                    break;
+                }
+                count += 1;
+            }
+            query() spawn [[root-->](`?user)[0]-->](`?session)[count];
+        }
+    } else {
+        api_key = chat_meta_db.get_api_key();
+        if api_key {
+            ready_to_chat = True;
+        } else {
+            ready_to_chat = False;
+        }
     }
 }

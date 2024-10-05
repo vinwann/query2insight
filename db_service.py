@@ -205,16 +205,11 @@ class TinyDBService:
             print(f"Error updating user data: {e}")
             return False
 
-    def get_user_data(self, user_id):
-        """Retrieves user data by user_id."""
+    def get_user_data(self):
+        """Retrieves user data stored under the key '1'."""
         try:
-            user = Query()
-            result = self.user_data_table.get(user.id == user_id)
-            if result:
-                return result
-            else:
-                print(f"No user found with id: {user_id}")
-                return None
+            return self.user_data_table.all()[0]
+            
         except Exception as e:
             print(f"Error retrieving user data: {e}")
             return None

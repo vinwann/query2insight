@@ -202,9 +202,10 @@ can main() {
                 imported_data = json.load(f);
             }
             create_graph(
-                user_data=imported_data['user_data'],
-                todo_list=imported_data['todo_list']
+                user_data=chat_meta_db.get_user_data(),
+                todo_list=chat_meta_db.get_all_tasks()
             ) spawn root;
+            
             chat() spawn [root-->](`?user)[0];
         } elif (app_state == app_states.NEW) {
             chat() spawn [root-->](`?user)[0];

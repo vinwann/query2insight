@@ -20,17 +20,6 @@
 
 :node:user_QA:can:print_output {
     tinydb_service = TinyDBService(here.session_id);
-    
-    #print(tinydb_service.return_chat_history());
-    
-    
-    #response (str) = "Hello, welcome to our health assistant. How can I assist you today?"
-    
-    
-    #response = "Hi there, it's nice to meet you. I'm here to help answer any questions you have about your health, medications, or provide general information on various topics. What's on your mind today?"
-    
-    
-    #"response = \"Introduction to Health Assistant\""
     self.answer = self.chat_llm(
         user_data=here.user_data,
         query=here.inquiry_by_user,

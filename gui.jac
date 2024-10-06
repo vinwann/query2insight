@@ -12,6 +12,8 @@ glob page = "chat";
 
 glob ready_to_chat = False;
 
+glob user_data_dic:obj;
+
 can start(backend_state: bool) {
     :g: page ;
     
@@ -96,7 +98,7 @@ can start(backend_state: bool) {
 
 can user_data() {
     :g: chat_meta_db ;
-    
+    :g: user_data_dic;
     st.subheader("User Details");
     api_key: obj = chat_meta_db.get_api_key();
     if api_key == None {
@@ -111,6 +113,66 @@ can user_data() {
             st.warning("Please set a vaild Groq api key");
         }
     }
+    user_data_dic = chat_meta_db.get_user_data();
+    st.title("User Health Data Display");
+    display_personal_info();
+    st.divider();
+    display_physical_measurements();
+    st.divider();
+    display_blood_pressure();
+    st.divider();
+    display_lifestyle();
+    st.divider();
+    display_blood_tests();
+}
+
+can display_personal_info(){
+    :g: user_data_dic;
+    st.subheader("Personal Information");
+    [col1, col2, col3] = st.columns(3);
+    col1.metric("Name", user_data_dic["name"]);
+    col2.metric("Age", f"{user_data_dic['age_years']} years");
+    col3.metric("Gender", user_data_dic["Gender"]);
+    st.metric("Marital Status", "Single" if not user_data_dic["Married"] else "Married");
+}
+can display_physical_measurements(){
+    :g: user_data_dic;
+    st.subheader("Physical Measurements");
+    [col1, col2, col3] = st.columns(3);
+    col1.metric("Height", f"{user_data_dic['Height_cm']} cm");
+    col2.metric("Weight", f"{user_data_dic['Weight_kg']} kg");
+    bmi = user_data_dic['Weight_kg'] / ((user_data_dic['Height_cm'] / 100) ** 2);
+    col3.metric("BMI", bmi);
+}
+can display_blood_pressure(){
+    :g: user_data_dic;
+    st.subheader("Blood Pressure");
+    if user_data_dic["Blood_Pressure_mmHg"] {
+        [systolic, diastolic] = user_data_dic["Blood_Pressure_mmHg"];
+        st.metric("Blood Pressure", f"{systolic}/{diastolic} mmHg");
+    }
+    else{
+        st.write("Blood pressure data not available");
+    }
+}
+can display_lifestyle(){
+    :g: user_data_dic;
+    st.subheader("Lifestyle");
+    [col1, col2] = st.columns(2);
+    col1.metric("Alcohol Intake", user_data_dic["Alcohol_Intake"] or "Not specified");
+    col2.metric("Physical Activity Level", user_data_dic["Physical_Activity_Level"] or "Not specified");
+}
+can display_blood_tests(){
+    :g: user_data_dic;
+    st.subheader("Blood Tests");
+    [col1, col2, col3] = st.columns(3);
+    col1.metric("Total Cholesterol", f"{user_data_dic['Cholesterol_Level_mg_dL']} mg/dL");
+    col2.metric("HDL", f"{user_data_dic['HDL_mg_dL']} mg/dL");
+    col3.metric("LDL", f"{user_data_dic['LDL_mg_dL']} mg/dL");
+    [col1, col2, col3] = st.columns(3);
+    col1.metric("Triglycerides", f"{user_data_dic['Triglycerides_mg_dL']} mg/dL");
+    col2.metric("Blood Glucose", f"{user_data_dic['Blood_Glucose_mg_dL']} mg/dL");
+    col3.metric("HbA1c", f"{user_data_dic['HbA1c_percent']}%");
 }
 
 can chat_interface(query_walker: walker, session: node) {

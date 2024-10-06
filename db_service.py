@@ -52,15 +52,7 @@ class TinyDBService:
                 "LDL_mg_dL": 0,
                 "Triglycerides_mg_dL": 0,
                 "Blood_Glucose_mg_dL": 0,
-                "HbA1c_percent": 0,
-                "Medications": [],
-                "Family_History": {
-                    "Diabetes": False,
-                    "Heart_Disease": False,
-                    "Stroke": False
-                },
-                "Allergies": [],
-                "Last_Checkup_Date": ""
+                "HbA1c_percent": 0
             }
             self.user_data_table.insert(default_user_data)
             print("Initialized user_data with default structure.")
@@ -189,20 +181,42 @@ class TinyDBService:
             print(f"Error inserting user data: {e}")
             return False
 
-    def update_user_data(self, user_id, updates):
-        """Updates user data fields based on user_id."""
+    def update_user_from_string(self, input_str):
+        """Updates a specific field in the user data using an input string like 'Height_cm:180' or 'Blood_Pressure_mmHg:180 90'."""
         try:
-            user = Query()
-            result = self.user_data_table.search(user.id == user_id)
-            if not result:
-                print(f"No user found with id: {user_id}")
-                return False
+            # Split the input string by colon
+            field, value = input_str.split(":")
+            
+            # Trim any extra spaces from the field name and value
+            field = field.strip()
+            value = value.strip()
 
-            record_id = result[0].doc_id
-            self.user_data_table.update(updates, doc_ids=[record_id])
+            # Handle multiple values (e.g., Blood_Pressure_mmHg:180 90)
+            if " " in value:
+                # Split by spaces and convert each part to int or float
+                value_list = [int(v) if v.isdigit() else float(v) for v in value.split()]
+                value = value_list  # Store as a list
+            else:
+                # Handle single value (e.g., Height_cm:180)
+                if value.isdigit():
+                    value = int(value)
+                else:
+                    try:
+                        value = float(value)
+                    except ValueError:
+                        # If it's not a number, leave it as a string
+                        pass
+
+            result = self.user_data_table.get(doc_id="1")
+         
+            result[field] = value
+            # Update the document in TinyDB
+            self.user_data_table.update(result)
+            print(f"Updated {field} to {value}.")
             return True
+       
         except Exception as e:
-            print(f"Error updating user data: {e}")
+            print(f"Error updating user data from string: {e}")
             return False
 
     def get_user_data(self):

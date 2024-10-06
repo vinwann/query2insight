@@ -32,12 +32,34 @@ glob app_state = app_states.BOOT_UP;
 
 enum task_type {
     RAG_TYPE: 'Need to use Retrivable information in specific topic' = "RAG",
-    QA_TYPE: 'Need to use given user information about themselves or questions asked about themselves' = "user_qa"
+    QA_TYPE: 'Need to use given user information about themselves or questions asked about themselves' = "user_qa",
+    DATA_TYPE: 'Need to use when the user is giving an answer to an question asked by the assistant to update user data' = 'DATA'
 }
 
 glob router_examples: 'Examples of routing of a query.if you are uncerteain of the routing method pick task_type.QA_TYPE. Do not pick anything outside of these three options': dict[str, task_type] = {
 #'When is my next check up?': task_type.TODO_TYPE,
-'whats my name?': task_type.QA_TYPE,'How to reduce cholrestrole': task_type.RAG_TYPE,'whats are my tasks for today?': task_type.QA_TYPE,'Do you think im healthy?': task_type.QA_TYPE,'What are the symptoms of low blood pressure?': task_type.RAG_TYPE,'What is a varible in python?': task_type.RAG_TYPE,'What is programming?': task_type.RAG_TYPE,'Can you tell me the definition of high blood presure': task_type.RAG_TYPE
+'whats my name?': task_type.QA_TYPE,
+'How to reduce cholrestrole': task_type.RAG_TYPE,
+'whats are my tasks for today?': task_type.QA_TYPE,
+'Do you think im healthy?': task_type.QA_TYPE,
+'What are the symptoms of low blood pressure?': task_type.RAG_TYPE,
+'What is a varible in python?': task_type.RAG_TYPE,
+'What is programming?': task_type.RAG_TYPE,
+'Can you tell me the definition of high blood presure': task_type.RAG_TYPE,
+'Im John': task_type.DATA_TYPE,
+'25 years old': task_type.DATA_TYPE
+};
+
+glob data_examples: 'Examples of the data given by the user and field that you should reply as and the data to be inputted in that field': dict[str, task_type] = {
+'My name is john?': "name:John",
+'John': "name:John",
+'Im 25 years old': "age_years:25",
+'My blood pressure is 145 90': "Blood_Pressure_mmHg:145 90",
+'John white': "name:john white",
+'male': "Gender:male",
+'Yes Im married': "Married:True",
+'the world is round': "None",
+'I cant tell you my weight':"None"
 };
 
 glob role_examples: 'Examples for picking assitant role.You are not limited to these examples.if you are uncerteain of the role pick personal assistant': dict[str, str] = {
@@ -84,7 +106,7 @@ node session {
         max_tokens=1024,
         incl_info=(role_examples)
     );
-    can 'You a smart assitant that has to pick a name for a chat an user has had. Looking at the chat history suggest a name for the chat and the previous name recommned by you. The name has to be shortand capture the entire conversation'
+    can 'You a smart assitant that has to pick a name for a chat an user has had. Looking at the chat history suggest a name for the chat and the previous name recommned by you. The name has to be short not more than 5 words and capture the entire conversation'
     chat_name_suggestion(chat_history: 'The chat history': list, chat_name: 'The previous chat name suggested': str) -> 'response': str by llm(temperature=1);
 }
 
@@ -132,7 +154,7 @@ node router {
     #has match:obj =  re.search(r'(@\w+)\s(.*)', '');
     can direct with query entry;
     can 'route the query to the appropriate task type'
-    router_with_llm(query: 'Query from the user to be routed.': str, todo_list: 'The tasks to be done by the user in the future.': list, user_data: 'data about the health status of the user.': dict) -> task_type by llm(
+    router_with_llm(query: 'Query from the user to be routed.': str, todo_list: 'The tasks to be done by the user in the future.': list, user_data: 'data about the health status of the user.': dict, chat_history: 'Previous Conversation with the user': list) -> task_type by llm(
         method="Reason",
         temperature=0.0,
         incl_info=(router_examples)
@@ -151,10 +173,22 @@ node user_QA {
     has answer: string = '';
 
     can print_output with query entry;
-    can 'You are an personal assistant.Answer in friendly detailed manner only answer only questions that are in your domain if you dont know the answer then say that you dont know in a polite manner'
+    can 'You are an personal assistant.Answer in friendly detailed manner only answer only questions that are in your domain if you dont know the answer then say that you dont know in a polite manner. IF the user data is empty ask questions about the fields in the user data to get information about the user'
     chat_llm(user_data: 'data about the user': list, query: 'Question from the user to be answered.': str, chat_history: 'Previous Conversation with the user': list) -> 'response': str by llm(temperature=0.7);
-    can 'You run in a loop of Thought, Action, PAUSE, Observation.\nAt the end of the loop you output an Answer\nUse Thought to describe your thoughts about the question you have been asked.\nUse Action to run one of the actions available to you - then return PAUSE.\nObservation will be the result of running those actions.\n\nYour available actions are:\n\ngetUserData:\ne.g. getUserData:\nProvides the data about the user in json format\n\ngetUserTasks:\ne.g. getUserTasks:\nProvides the users task list in json format\n\ngetCurrentDateTime:\ne.g. getCurrentDateTime:\nProvides the current data and time\nExample session:\n\nQuestion: Whats my name?\nThought: I need to find the users name\nAction: getUserData:\nPAUSE \n\nYou will be called again with this:\n\nObservation: { "name":"vinura",\n"age": 20,\n"Pressure": (120, 80),\n"Married": False\n}\n\nIf you have the answer, output it as the Answer.\n\nAnswer:Your name is Vinura.'
-    agent_llm(query: 'The question the user has.': str) -> 'response': str by llm(temperature=0.7, max_tokens=1024);
+}
+
+node user_DATA {
+    has answer: string = '';
+    has data_entry_answer: string= '';
+    can print_output with query entry;
+    can 'Using answer given by the user output the field that should be updated in user_data. If there are further empty fields in the user_data ask about them and get answers, if you are uncertain of a field , the user refuses to answer or the answer doesnt make sense return None. Use the exmples given and only reply in that formate'
+    data_entry(user_data: 'data about the user': list, answer: 'Data given by the user to be answered.': str, chat_history: 'Previous Conversation with the user': list) -> 'response': str by llm(
+        method="Reason",
+        temperature=0,
+        incl_info=(data_examples)
+    );
+    can 'You are an personal assistant.The user has answered a question to fill up the user data regarding the user you have to thank the user for answering.The field the answered data belongs to has been determind and given in tfiled variable. IF the user data is empty ask only one question from the empty fields in the user data to get information about the user. Ask from the user'
+    chat_llm(user_data: 'data about the user': list, query: 'Answer from the user to be answered.': str,field:'Assied data field for the users answer ':str, chat_history: 'Previous Conversation with the user': list) -> 'response': str by llm(temperature=0.7);
 }
 
 node user_TODO {
@@ -198,14 +232,7 @@ can main() {
         if (app_state == app_states.BOOT_UP) {
             os.environ["GROQ_API_KEY"] = api_key;
             llm = Groq(model_name="llama-3.1-70b-versatile");
-            with open('user_info.json', 'r') as f {
-                imported_data = json.load(f);
-            }
-            create_graph(
-                user_data=chat_meta_db.get_user_data(),
-                todo_list=chat_meta_db.get_all_tasks()
-            ) spawn root;
-            
+            create_graph() spawn root;
             chat() spawn [root-->](`?user)[0];
         } elif (app_state == app_states.NEW) {
             chat() spawn [root-->](`?user)[0];

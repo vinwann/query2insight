@@ -18,7 +18,7 @@ glob RagEngine: rag_engine = rag_engine();
 
 glob assitant_type: string = "programming assiatant";
 
-glob current_session_id: str;
+glob current_session_id:str = "";
 
 glob ready_to_chat = False;
 

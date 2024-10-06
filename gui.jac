@@ -51,10 +51,25 @@ can start(backend_state: bool) {
     } else {
         page = st.sidebar.selectbox("Go to", ["Details", "Chat"]);
     }
+    api_key: obj = chat_meta_db.get_api_key();
+    print("api_key ",api_key);
+    if api_key == None {
+        api_key = "";
+    }
+    new_api_key: str = st.sidebar.text_input("Groq API key", value=api_key, type='password');
+    print("new_api_key ",new_api_key);
+    if new_api_key != api_key {
+        if verify_groq_api_key(new_api_key) {
+            chat_meta_db.update_api_key(new_api_key);
+            os.environ["GROQ_API_KEY"] = new_api_key;
+        } else {
+            st.warning("Please set a vaild Groq api key");
+        }
+    }
     if (page == "Chat") {
         if ready_to_chat == False {
             st.warning(
-                "Please set your Groq API key in the User Details page."
+                "Please set your Groq API key."
             );
         }
         if st.sidebar.button('Start new chat') {
@@ -99,80 +114,126 @@ can start(backend_state: bool) {
 can user_data() {
     :g: chat_meta_db ;
     :g: user_data_dic;
-    st.subheader("User Details");
-    api_key: obj = chat_meta_db.get_api_key();
-    if api_key == None {
-        api_key = "";
-    }
-    new_api_key: str = st.text_input("Groq API Key", api_key);
-    if new_api_key != api_key {
-        if verify_groq_api_key(new_api_key) {
-            chat_meta_db.update_api_key(new_api_key);
-            os.environ["GROQ_API_KEY"] = new_api_key;
-        } else {
-            st.warning("Please set a vaild Groq api key");
+    st.markdown("""
+    <style>
+        .card {
+            border-radius: 5px;
+            padding: 5px;
+            margin: 10px 0px;
+            background-color: #f0f2f6;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
-    }
+        .metric-card {
+            border-radius: 5px;
+            padding: 15px;
+            margin: 5px 0px;
+            background-color: #ffffff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .metric-label {
+            font-size: 0.8rem;
+            font-weight: bold;
+            color: #555;
+        }
+        .metric-value {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #0f52ba;
+        }
+        .gauge {
+            width: 100%;
+            height: 5px;
+            background-color: #e0e0e0;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .gauge-fill {
+            height: 100%;
+            background-color: #4CAF50;
+            transition: width 0.5s ease-out;
+        }
+    </style>
+    """, unsafe_allow_html=True);
     user_data_dic = chat_meta_db.get_user_data();
-    st.title("User Health Data Display");
-    display_personal_info();
-    st.divider();
-    display_physical_measurements();
-    st.divider();
-    display_blood_pressure();
-    st.divider();
-    display_lifestyle();
-    st.divider();
-    display_blood_tests();
-}
+    st.title("Health Dashboard");
+    # Personal Information
+    #st.markdown("<div class='card'>", unsafe_allow_html=True);
 
-can display_personal_info(){
-    :g: user_data_dic;
-    st.subheader("Personal Information");
+    st.subheader(" \U0001F4CB Personal Information");
     [col1, col2, col3] = st.columns(3);
-    col1.metric("Name", user_data_dic["name"]);
-    col2.metric("Age", f"{user_data_dic['age_years']} years");
-    col3.metric("Gender", user_data_dic["Gender"]);
-    st.metric("Marital Status", "Single" if not user_data_dic["Married"] else "Married");
-}
-can display_physical_measurements(){
-    :g: user_data_dic;
-    st.subheader("Physical Measurements");
+    col1.markdown(create_metric_card("Name", user_data_dic["name"]), unsafe_allow_html=True);
+    col2.markdown(create_metric_card("Age", f"{user_data_dic['age_years']} years"), unsafe_allow_html=True);
+    col3.markdown(create_metric_card("Marital Status", "Married" if user_data_dic["Married"] else "Single"), unsafe_allow_html=True);
+    st.markdown("</div>", unsafe_allow_html=True);
+
+    # Physical Measurements
+    #st.markdown("<div class='card'>", unsafe_allow_html=True);
+    st.divider();
+    st.subheader(" \U0001F4CF Physical Measurements");
     [col1, col2, col3] = st.columns(3);
-    col1.metric("Height", f"{user_data_dic['Height_cm']} cm");
-    col2.metric("Weight", f"{user_data_dic['Weight_kg']} kg");
-    bmi = user_data_dic['Weight_kg'] / ((user_data_dic['Height_cm'] / 100) ** 2);
-    col3.metric("BMI", bmi);
-}
-can display_blood_pressure(){
-    :g: user_data_dic;
-    st.subheader("Blood Pressure");
-    if user_data_dic["Blood_Pressure_mmHg"] {
-        [systolic, diastolic] = user_data_dic["Blood_Pressure_mmHg"];
-        st.metric("Blood Pressure", f"{systolic}/{diastolic} mmHg");
+    col1.markdown(create_metric_card("Height", f"{user_data_dic['Height_cm']} cm"), unsafe_allow_html=True);
+    col2.markdown(create_metric_card("Weight", f"{user_data_dic['Weight_kg']} kg"), unsafe_allow_html=True);
+    if (user_data_dic['Height_cm'] == 0)
+    {
+        bmi = 0;
     }
     else{
-        st.write("Blood pressure data not available");
+        bmi = user_data_dic['Weight_kg'] / ((user_data_dic['Height_cm'] / 100) ** 2);
     }
-}
-can display_lifestyle(){
-    :g: user_data_dic;
-    st.subheader("Lifestyle");
+    col3.markdown(create_gauge(bmi, 18.5, 30, "BMI", "kg/m²"), unsafe_allow_html=True);
+    st.markdown("</div>", unsafe_allow_html=True);
+
+    # Vital Signs
+    #st.markdown("<div class='card'>", unsafe_allow_html=True);
+    st.divider();
+    st.subheader(" \U00002764\U0000FE0F Vital Signs");
     [col1, col2] = st.columns(2);
-    col1.metric("Alcohol Intake", user_data_dic["Alcohol_Intake"] or "Not specified");
-    col2.metric("Physical Activity Level", user_data_dic["Physical_Activity_Level"] or "Not specified");
+    if (len(user_data_dic["Blood_Pressure_mmHg"]) >0){
+        [systolic, diastolic] = user_data_dic["Blood_Pressure_mmHg"];
+    }
+    else{
+        [systolic, diastolic] = [0,0];
+    }
+    col1.markdown(create_gauge(systolic, 90, 180, "Systolic Blood Pressure", "mmHg"), unsafe_allow_html=True);
+    col2.markdown(create_gauge(diastolic, 60, 120, "Diastolic Blood Pressure", "mmHg"), unsafe_allow_html=True);
+    st.markdown("</div>", unsafe_allow_html=True);
+
+    # Lifestyle
+    #st.markdown("<div class='card'>", unsafe_allow_html=True);
+    st.divider();
+    st.subheader(" \U0001F3C3 Lifestyle");
+    [col1, col2] = st.columns(2);
+    col1.markdown(create_metric_card("Alcohol Intake", user_data_dic["Alcohol_Intake"]), unsafe_allow_html=True);
+    col2.markdown(create_metric_card("Physical Activity", user_data_dic["Physical_Activity_Level"]), unsafe_allow_html=True);
+    st.markdown("</div>", unsafe_allow_html=True);
+
+    # Blood Tests
+    #st.markdown("<div class='card'>", unsafe_allow_html=True);
+    st.divider();
+    st.subheader(" \U0001FA78 Blood Tests");
+    [col1, col2, col3] = st.columns(3);
+    col1.markdown(create_gauge(user_data_dic['Cholesterol_Level_mg_dL'], 150, 300, "Total Cholesterol", "mg/dL"), unsafe_allow_html=True);
+    col2.markdown(create_gauge(user_data_dic['HDL_mg_dL'], 40, 80, "HDL", "mg/dL"), unsafe_allow_html=True);
+    col3.markdown(create_gauge(user_data_dic['LDL_mg_dL'], 70, 160, "LDL", "mg/dL"), unsafe_allow_html=True);
+    [col1, col2, col3] = st.columns(3);
+    col1.markdown(create_gauge(user_data_dic['Triglycerides_mg_dL'], 50, 200, "Triglycerides", "mg/dL"), unsafe_allow_html=True);
+    col2.markdown(create_gauge(user_data_dic['Blood_Glucose_mg_dL'], 70, 140, "Blood Glucose", "mg/dL"), unsafe_allow_html=True);
+    col3.markdown(create_gauge(user_data_dic['HbA1c_percent'], 4, 8, "HbA1c", "%"), unsafe_allow_html=True);
+    st.markdown("</div>", unsafe_allow_html=True);
 }
-can display_blood_tests(){
-    :g: user_data_dic;
-    st.subheader("Blood Tests");
-    [col1, col2, col3] = st.columns(3);
-    col1.metric("Total Cholesterol", f"{user_data_dic['Cholesterol_Level_mg_dL']} mg/dL");
-    col2.metric("HDL", f"{user_data_dic['HDL_mg_dL']} mg/dL");
-    col3.metric("LDL", f"{user_data_dic['LDL_mg_dL']} mg/dL");
-    [col1, col2, col3] = st.columns(3);
-    col1.metric("Triglycerides", f"{user_data_dic['Triglycerides_mg_dL']} mg/dL");
-    col2.metric("Blood Glucose", f"{user_data_dic['Blood_Glucose_mg_dL']} mg/dL");
-    col3.metric("HbA1c", f"{user_data_dic['HbA1c_percent']}%");
+
+can create_metric_card(label:str, value:str){
+    unit = "";
+    output = f"<div class='metric-card'> <div class='metric-label'>{label}</div> <div class='metric-value'>{value} {unit}</div></div>";
+    return output;
+}
+can create_gauge(value:int, min_val:int, max_val:int, label:str, unit:str = "") {
+    percentage = (value - min_val) / (max_val - min_val) * 100;
+    output = "<div class='metric-card'><div class='metric-label'>" + label + 
+             "</div><div class='metric-value'>" + str(value) + " " + unit + 
+             "</div><div class='gauge'><div class='gauge-fill' style='width: " + str(percentage) + 
+             "%;'></div></div></div>";
+    return output;
 }
 
 can chat_interface(query_walker: walker, session: node) {

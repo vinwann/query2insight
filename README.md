@@ -25,11 +25,16 @@
 <ul>
   <li>Upload your own documents and ask questions from them.</li>
   <li>Ask questions about yourself.</li>
-  https://github.com/user-attachments/assets/65eceefa-0af3-421b-843c-b249107f7061
   <li>Tell the LLM about yourself and it will save your information.</li>
-  https://github.com/user-attachments/assets/6be69801-2e86-40c9-9462-55d960e0b3cf
+  
 </ul>
+### Chatting with LLM
 
+https://github.com/user-attachments/assets/65eceefa-0af3-421b-843c-b249107f7061
+
+### User data updating through chat
+
+https://github.com/user-attachments/assets/6be69801-2e86-40c9-9462-55d960e0b3cf
 
 ## Dependencies
 

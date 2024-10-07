@@ -182,7 +182,7 @@ node user_DATA {
     has answer: string = '';
     has data_entry_answer: string= '';
     can print_output with query entry;
-    can 'Using answer given by the user output the field that should be updated in user_data. If there are further empty fields in the user_data ask about them and get answers, if you are uncertain of a field , the user refuses to answer or the answer doesnt make sense return None. Use the exmples given and only reply in that formate'
+    can 'Using answer given by the user output the field that should be updated in user_data. If there are further empty fields in the user_data ask about them and get answers, if you are uncertain of a field , the user refuses to answer or the answer doesnt make sense return None. If the suitable field is not in user data create one. Use the exmples given and only reply in that formate'
     data_entry(user_data: 'data about the user': list, answer: 'Data given by the user to be answered.': str, chat_history: 'Previous Conversation with the user': list) -> 'response': list by llm(
         method="Reason",
         temperature=0,

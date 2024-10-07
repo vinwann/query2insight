@@ -53,7 +53,7 @@ https://github.com/user-attachments/assets/6be69801-2e86-40c9-9462-55d960e0b3cf
 
 ## Dependencies
 
-Install the necessary dependencies by running. Ensure that you have Python 3.12
+Install the necessary dependencies by running. Ensure that you have Python 3.12. The application has only been tested in Linux and I would recommned using it in Linux. If you you are using Windows I recommned that you set it up with WSL
 
 ```shell
 python3 -m pip install -r requirements.txt

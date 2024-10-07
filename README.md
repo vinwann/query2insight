@@ -11,7 +11,9 @@ https://github.com/user-attachments/assets/65eceefa-0af3-421b-843c-b249107f7061
 - [Query2Insight](#Query2Insight)
   - [Introduction](#introduction)
   - [Dependencies](#dependencies)
-  - [Technologies, Frameworks, and Libraries Used](#Technologies)
+  - [Technologies](#Technologies)
+  - [Data spatial architecture](#Data-spatial-architecture)
+  - [LLM-calls](#LLM-calls)
 
 ## Dependencies
 
@@ -42,11 +44,11 @@ python3 -m pip install -r requirements.txt
 
 https://github.com/user-attachments/assets/6be69801-2e86-40c9-9462-55d960e0b3cf
 
-<p><strong>Data spatial architecture</strong></p>
+## Data-spatial-architecture
 
 ![Data spactial structure](https://github.com/user-attachments/assets/a00294e4-089b-42de-92a6-d178eb93a65a)
 
-<p><strong>LLM calls</strong></p>
+## LLM-calls
 
 ![llm calls](https://github.com/user-attachments/assets/f67854ef-d5ce-4059-808e-dce323e5ac73)
  

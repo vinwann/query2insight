@@ -1,4 +1,11 @@
 
+- [Query2Insight](#Query2Insight)
+  - [Introduction](#introduction)
+  - [Dependencies](#dependencies)
+  - [Technologies](#Technologies)
+  - [Data spatial architecture](#Data-spatial-architecture)
+  - [LLM-calls](#LLM-calls)
+
 # Query2Insight
 
 ## Introduction
@@ -7,13 +14,6 @@
 ![ui](https://github.com/user-attachments/assets/cadeb92d-7fd6-4358-8069-f30f321a7683)
 
 https://github.com/user-attachments/assets/65eceefa-0af3-421b-843c-b249107f7061
-
-- [Query2Insight](#Query2Insight)
-  - [Introduction](#introduction)
-  - [Dependencies](#dependencies)
-  - [Technologies](#Technologies)
-  - [Data spatial architecture](#Data-spatial-architecture)
-  - [LLM-calls](#LLM-calls)
 
 ## Dependencies
 

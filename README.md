@@ -18,8 +18,6 @@
     <li>Ollama (Generate embeddings)</li>
     <li>ChromaDB (Vector database)</li>
     <li>RAG Engine (Retrieval-Augmented Generation)</li>
-    <li>JSON (Data Management)</li>
-    <li>UUID (Unique Identifier Generation)</li> 
   </ul>
 </div>
 

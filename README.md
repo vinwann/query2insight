@@ -120,5 +120,24 @@ jac clean
 ## LLM-calls
 
 ![llm calls](https://github.com/user-attachments/assets/96920c0b-2dce-4caf-9c76-82abd197668e)
- 
+
+### Picking assistant type
+
+```shell
+glob role_examples: 'Examples for picking assitant role.You are not limited to these examples.if you are uncerteain of the role pick personal assistant': dict[str, str] = {
+'Can you help me with programming?': 'Programming assistant',
+'Hi help me with this pyhton ?': 'Programming assistant',
+'What are the symptoms of low blood pressure?': 'Health assistant',
+'Hi?': 'personal assistant',
+'Hi who am i?': 'personal assistant'
+};
+
+
+can 'You a smart assitant role picker, using the user query you have to decide what sort of an assistant the user requires to get help.'
+    pick_assitant_type(query: 'The question the user has.': str) -> 'response': str by llm(
+        temperature=1,
+        max_tokens=1024,
+        incl_info=(role_examples)
+    );
+```
 

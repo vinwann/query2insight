@@ -1,10 +1,20 @@
-<div align="center">
-<h1>Query2Insight</h1>
 
-<p><strong>Description </strong></p>
+# Query2Insight
+
+## Introduction
   <p>Query2Insight is a fully open-source LLM-powered chatbot designed to provide users with tailored insights and assistance across various domains. The app integrates several cutting-edge technologies to enhance its functionality and user experience. It utilizes the power of Groq for efficient model execution and leverages Streamlit for an interactive user interface. The backend is supported by TinyDBService, which manages the chatbot's metadata and session information. The RAG engine plays a crucial role in retrieving context-specific information to ensure accurate responses. The chatbot is capable of handling different types of queries, including those related to programming, health, and general assistance.</p>
-  
-  
+
+- [Query2Insight](#Query2Insight)
+  - [Introduction](#introduction)
+  - [Dependencies](#dependencies)
+
+## Dependencies
+
+Install the necessary dependencies by running.
+
+```shell
+python3 -m pip install -r requirements.txt
+```
   <div align="left">
   <p><strong>Technologies, Frameworks, and Libraries Used:</strong></p>
     
@@ -37,4 +47,4 @@ https://github.com/user-attachments/assets/6be69801-2e86-40c9-9462-55d960e0b3cf
 
 ![llm calls](https://github.com/user-attachments/assets/f67854ef-d5ce-4059-808e-dce323e5ac73)
  
-</div>
+

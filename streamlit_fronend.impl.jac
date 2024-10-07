@@ -46,13 +46,10 @@
     print(self.data_entry_answer);
     if (self.data_entry_answer and self.data_entry_answer != "None")
     {
-        matches = re.findall(r'"([^"]*)"', self.data_entry_answer);
-        if len(matches) > 0 {
-            self.data_entry_answer= matches[0];
+        for i in self.data_entry_answer
+        {
+            chat_meta_db.update_user_from_string(i);
         }
-        print(self.data_entry_answer);
-        
-        chat_meta_db.update_user_from_string(self.data_entry_answer);
     }
     self.answer = self.chat_llm(
         user_data=here.user_data,

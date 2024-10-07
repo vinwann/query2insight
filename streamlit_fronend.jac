@@ -51,15 +51,16 @@ glob router_examples: 'Examples of routing of a query.if you are uncerteain of t
 };
 
 glob data_examples: 'Examples of the data given by the user and field that you should reply as and the data to be inputted in that field': dict[str, task_type] = {
-'My name is john?': "name:John",
-'John': "name:John",
-'Im 25 years old': "age_years:25",
-'My blood pressure is 145 90': "Blood_Pressure_mmHg:145 90",
-'John white': "name:john white",
-'male': "Gender:male",
-'Yes Im married': "Married:True",
+'My name is john?': ["name:John"],
+'John': ["name:John"],
+'Im 25 years old': ["age_years:25"],
+'My blood pressure is 145 90': ["Blood_Pressure_mmHg:145 90"],
+'John white': ["name:john white"],
+'male': ["Gender:male"],
+'Yes Im married': ["Married:True"],
 'the world is round': "None",
-'I cant tell you my weight':"None"
+'I cant tell you my weight':"None",
+'My name is  John and im 25 years old': ["name:John","age_years:25"]
 };
 
 glob role_examples: 'Examples for picking assitant role.You are not limited to these examples.if you are uncerteain of the role pick personal assistant': dict[str, str] = {
@@ -182,7 +183,7 @@ node user_DATA {
     has data_entry_answer: string= '';
     can print_output with query entry;
     can 'Using answer given by the user output the field that should be updated in user_data. If there are further empty fields in the user_data ask about them and get answers, if you are uncertain of a field , the user refuses to answer or the answer doesnt make sense return None. Use the exmples given and only reply in that formate'
-    data_entry(user_data: 'data about the user': list, answer: 'Data given by the user to be answered.': str, chat_history: 'Previous Conversation with the user': list) -> 'response': str by llm(
+    data_entry(user_data: 'data about the user': list, answer: 'Data given by the user to be answered.': str, chat_history: 'Previous Conversation with the user': list) -> 'response': list by llm(
         method="Reason",
         temperature=0,
         incl_info=(data_examples)

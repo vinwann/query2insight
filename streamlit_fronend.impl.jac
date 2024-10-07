@@ -201,7 +201,6 @@
             end ++> (end := router());
             end ++> RAG();
             end ++> user_QA();
-            end ++> user_TODO();
             end ++> user_DATA();
         }
         app_state = app_states.RUNNING;
@@ -230,7 +229,6 @@
     end ++> (end := router());
     end ++> RAG();
     end ++> user_QA();
-    end ++> user_TODO();
     end ++> user_DATA();
     visit [<--];
 }

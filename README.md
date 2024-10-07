@@ -23,7 +23,7 @@
   </ul>
 </div>
 
-![ui](https://github.com/user-attachments/assets/43f19ed9-cd85-440c-b16e-bad94903ee71)
+![ui](https://github.com/user-attachments/assets/8fda7313-b5ef-41db-a460-a9a342f73a04)
 
 
 https://github.com/user-attachments/assets/e5065d8f-5ada-451c-9e31-35fca53ad159

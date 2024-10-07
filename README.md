@@ -119,6 +119,6 @@ jac clean
   
 ## LLM-calls
 
-![llm calls](https://github.com/user-attachments/assets/7deb4eb5-39b4-49cf-8ca6-590d2bb320ea)
+![llm calls](https://github.com/user-attachments/assets/96920c0b-2dce-4caf-9c76-82abd197668e)
  
 

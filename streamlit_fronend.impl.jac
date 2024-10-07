@@ -6,6 +6,11 @@
         retrived_context=RagEngine.get_from_chroma(query=here.inquiry_by_user),
         chat_history=tinydb_service.return_chat_history()
     );
+    matches = re.findall(r'"([^"]*)"', self.answer);
+    if len(matches) > 0 {
+        self.answer = matches[0];
+    }
+    print(matches);
     gui.display_response(self.answer);
     here.user_query["role"] = "assistant";
     here.user_query["content"] = self.answer;
@@ -15,22 +20,16 @@
 
 :node:user_QA:can:print_output {
     tinydb_service = TinyDBService(here.session_id);
-    
-    #print(tinydb_service.return_chat_history());
-    
-    
-    #response (str) = "Hello, welcome to our health assistant. How can I assist you today?"
-    
-    
-    #response = "Hi there, it's nice to meet you. I'm here to help answer any questions you have about your health, medications, or provide general information on various topics. What's on your mind today?"
-    
-    
-    #"response = \"Introduction to Health Assistant\""
     self.answer = self.chat_llm(
         user_data=here.user_data,
         query=here.inquiry_by_user,
         chat_history=tinydb_service.return_chat_history()
     );
+    matches = re.findall(r'"([^"]*)"', self.answer);
+    if len(matches) > 0 {
+        self.answer = matches[0];
+    }
+    print(matches);
     gui.display_response(self.answer);
     here.user_query["role"] = "assistant";
     here.user_query["content"] = self.answer;
@@ -38,13 +37,36 @@
     visit [<--];
 }
 
-:node:user_TODO:can:print_output {
+:node:user_DATA:can:print_output {
     tinydb_service = TinyDBService(here.session_id);
-    self.answer = self.chat_llm(
-        todo_list=here.todo_list,
-        query=here.inquiry_by_user,
+    self.data_entry_answer = self.data_entry(
+        user_data=here.user_data,
+        answer=here.inquiry_by_user,
         chat_history=tinydb_service.return_chat_history()
     );
+    print(self.data_entry_answer);
+    if (self.data_entry_answer and self.data_entry_answer != "None")
+    {
+        for i in self.data_entry_answer
+        {
+            if i != "None"
+            {
+            chat_meta_db.update_user_from_string(i);
+            }
+        }
+    }
+    self.answer = self.chat_llm(
+        user_data=here.user_data,
+        query=here.inquiry_by_user,
+        field=self.data_entry_answer,
+        chat_history=tinydb_service.return_chat_history()
+    );
+    
+    matches = re.findall(r'"([^"]*)"', self.answer);
+    if len(matches) > 0 {
+        self.answer = matches[0];
+    }
+    print(matches);
     gui.display_response(self.answer);
     here.user_query["role"] = "assistant";
     here.user_query["content"] = self.answer;
@@ -54,18 +76,20 @@
 
 :node:session:can:send_query_to_router {
     :g: chat_meta_db ;
-    
-    print("session_id ", self.session_id);
     if (here.just_init) {
         here.just_init = False;
         gui.chat_interface(here, self);
         here.session_id = self.session_id;
+        self.user_data= chat_meta_db.get_user_data();
         here.user_data = self.user_data;
-        here.todo_list = self.todo_list;
         here.chat_history = [];
         if (len(here.inquiry_by_user) > 0) {
             self.session_assitant_type = self.pick_assitant_type(here.inquiry_by_user);
-            print(self.session_assitant_type);
+            matches = re.findall(r'"([^"]*)"', self.session_assitant_type);
+            if len(matches) > 0 {
+                self.session_assitant_type = matches[0];
+            }
+            print("Selected assistant type ",self.session_assitant_type);
             here.session_assitant_type = self.session_assitant_type;
         }
     }
@@ -87,6 +111,10 @@
             chat_history=self.tinydb_service.return_chat_history(),
             chat_name=self.chat_name
         );
+        matches = re.findall(r'"([^"]*)"', self.chat_name);
+        if len(matches) > 0 {
+            self.chat_name = matches[0];
+        }
         chat_meta_db.add_name_by_id(
             self.session_id,
             self.chat_name
@@ -97,16 +125,19 @@
 
 :node:router:can:direct {
     if (len(here.inquiry_by_user) > 0) {
+        tinydb_service = TinyDBService(here.session_id);
         task: task_type = self.router_with_llm(
             query=here.inquiry_by_user,
-            todo_list=here.todo_list,
-            user_data=here.user_data
+            user_data=here.user_data,
+            chat_history=tinydb_service.return_chat_history()
         );
-        print(task);
+        print("Task type ",task);
         if task == task_type.RAG_TYPE {
             visit [-->](`?RAG);
-        } elif task == task_type.QA_TYPE | task != None {
+        } elif task == task_type.QA_TYPE  {
             visit [-->](`?user_QA);
+        } elif task == task_type.DATA_TYPE  {
+            visit [-->](`?user_DATA);
         } else {
             gui.display_response(
                 "Kindly add a routing method by using @ in the start of your question\nTo visit TODO : @TODO\nTo visit RAG : @RAG\nTo visit QA : @QA"
@@ -126,8 +157,6 @@
 :walker:create_graph:can:generate_graph {
     end = here;# Assign the current root node (here) to end
     end ++> (end := user()); # Create a user node and connect it to the end node. Assign the new user node to the end.
-    end ++> data(user_data=self.user_data); # Create a data node with the user data and connect it to the end node.
-    end ++> todo(todo_list=self.todo_list); # Create a todo node with the todo list and connect it to the end node.
 }
 
 :walker:chat:can:create_session {
@@ -136,16 +165,13 @@
     :g: app_state ;
     
     :g: current_session_id ;
-    
-    data_node = [-->](`?data)[0];# Getting the data node filtered. can use [0] as having only one such node.
-    todo_node = [-->](`?todo)[0];# Getting the todo node filtered. can use [0] as having only one such node.
+
     if (app_state == app_states.BOOT_UP) {
         for chat_id in chat_meta_db.return_all_chats() {
             temp_tinydb_service: obj = TinyDBService(chat_id['id']);
             session_node = here ++> session(
                 session_id=chat_id['id'],
-                user_data=data_node.user_data,
-                todo_list=todo_node.todo_list,
+                user_data= chat_meta_db.get_user_data(),   
                 tinydb_service=TinyDBService(chat_id['id']),
                 chat_history=temp_tinydb_service.return_chat_history()
             );
@@ -153,45 +179,15 @@
             end ++> (end := router());
             end ++> RAG();
             end ++> user_QA();
-            end ++> user_TODO();
+            end ++> user_DATA();
         }
         app_state = app_states.RUNNING;
     } elif (app_state == app_states.NEW) {
         # Telescope into the nodes connected to the user node without walking.
         new_session_id = str(uuid.uuid4());
-        
-        # Creating a new session node with the user data and todo list and connect it to the user.
-        
-        
-        #here.query_state = 1;
-        
-        
-        # Assign the current root node (here) to end
-        
-        
-        # Create a user node and connect it to the end node. Assign the new user node to the end.
-        
-        
-        # Create a data node with the user data and connect it to the end node.
-        
-        
-        # Create a todo node with the todo list and connect it to the end node.
-        
-        
-        # Getting the data node filtered. can use [0] as having only one such node.
-        
-        
-        # Getting the todo node filtered. can use [0] as having only one such node.
-        
-        
-        # Telescope into the nodes connected to the user node without walking.
-        
-        
-        # Creating a new session node with the user data and todo list and connect it to the user.
         n = here ++> session(
             session_id=new_session_id,
-            user_data=data_node.user_data,
-            todo_list=todo_node.todo_list,
+            user_data= chat_meta_db.get_user_data(),   
             tinydb_service=TinyDBService(new_session_id)
         );
         chat_meta_db.insert_data(
@@ -210,6 +206,6 @@
     end ++> (end := router());
     end ++> RAG();
     end ++> user_QA();
-    end ++> user_TODO();
+    end ++> user_DATA();
     visit [<--];
 }

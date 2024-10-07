@@ -14,7 +14,7 @@ class TinyDBService:
 
         self.db = self.connect_or_create_db()
         self.initialize_user_data()
-        self.initialize_tasks()
+  
         
     def connect_or_create_db(self):
         """Connects to the existing database or creates a new one if it doesn't exist."""
@@ -28,7 +28,6 @@ class TinyDBService:
             self.metadata_table = db.table("metadata")
             self.api_table = db.table("apidata")
             self.user_data_table = db.table("user_data")
-            self.tasks_table = db.table("tasks")
             return db
         except Exception as e:
             print(f"Error connecting to or creating database: {e}")
@@ -44,7 +43,7 @@ class TinyDBService:
                 "Height_cm": 0,
                 "Weight_kg": 0,
                 "Blood_Pressure_mmHg": [],
-                "Married": False,
+                "Occupation": "",
                 "Alcohol_Intake": "",
                 "Physical_Activity_Level": "",
                 "Cholesterol_Level_mg_dL": 0,
@@ -52,27 +51,10 @@ class TinyDBService:
                 "LDL_mg_dL": 0,
                 "Triglycerides_mg_dL": 0,
                 "Blood_Glucose_mg_dL": 0,
-                "HbA1c_percent": 0,
-                "Medications": [],
-                "Family_History": {
-                    "Diabetes": False,
-                    "Heart_Disease": False,
-                    "Stroke": False
-                },
-                "Allergies": [],
-                "Last_Checkup_Date": ""
+                "HbA1c_percent": 0
             }
             self.user_data_table.insert(default_user_data)
             print("Initialized user_data with default structure.")
-
-    def initialize_tasks(self):
-        """Initializes tasks with an empty todo_list if empty."""
-        if len(self.tasks_table) == 0:
-            default_tasks = {
-                "todo_list": []
-            }
-            self.tasks_table.insert(default_tasks)
-            print("Initialized tasks with default structure.")
 
 
     def insert_data(self, data):
@@ -189,83 +171,50 @@ class TinyDBService:
             print(f"Error inserting user data: {e}")
             return False
 
-    def update_user_data(self, user_id, updates):
-        """Updates user data fields based on user_id."""
+    def update_user_from_string(self, input_str):
+        """Updates a specific field in the user data using an input string like 'Height_cm:180' or 'Blood_Pressure_mmHg:180 90'."""
         try:
-            user = Query()
-            result = self.user_data_table.search(user.id == user_id)
-            if not result:
-                print(f"No user found with id: {user_id}")
-                return False
+            # Split the input string by colon
+            field, value = input_str.split(":")
+            
+            # Trim any extra spaces from the field name and value
+            field = field.strip()
+            value = value.strip()
 
-            record_id = result[0].doc_id
-            self.user_data_table.update(updates, doc_ids=[record_id])
+            # Handle multiple values (e.g., Blood_Pressure_mmHg:180 90)
+            if " " in value:
+                # Split by spaces and convert each part to int or float
+                value_list = [int(v) if v.isdigit() else float(v) for v in value.split()]
+                value = value_list  # Store as a list
+            else:
+                # Handle single value (e.g., Height_cm:180)
+                if value.isdigit():
+                    value = int(value)
+                else:
+                    try:
+                        value = float(value)
+                    except ValueError:
+                        # If it's not a number, leave it as a string
+                        pass
+
+            result = self.user_data_table.get(doc_id="1")
+         
+            result[field] = value
+            # Update the document in TinyDB
+            self.user_data_table.update(result)
+            print(f"Updated {field} to {value}.")
             return True
+       
         except Exception as e:
-            print(f"Error updating user data: {e}")
+            print(f"Error updating user data from string: {e}")
             return False
 
-    def get_user_data(self, user_id):
-        """Retrieves user data by user_id."""
+    def get_user_data(self):
+        """Retrieves user data stored under the key '1'."""
         try:
-            user = Query()
-            result = self.user_data_table.get(user.id == user_id)
-            if result:
-                return result
-            else:
-                print(f"No user found with id: {user_id}")
-                return None
+            return self.user_data_table.all()[0]
+            
         except Exception as e:
             print(f"Error retrieving user data: {e}")
             return None
         
-    # Tasks methods
-
-    def add_task(self, task):
-        """Adds a task to the tasks table."""
-        try:
-            task_datetime = self.extract_task_datetime(task)
-            self.tasks_table.insert({"task": task, "task_datetime": task_datetime})
-            return True
-        except Exception as e:
-            print(f"Error adding task: {e}")
-            return False
-
-    def remove_task(self, task):
-        """Removes a task from the tasks table based on the task description."""
-        try:
-            task_query = Query()
-            result = self.tasks_table.search(task_query.task == task)
-            if result:
-                self.tasks_table.remove(task_query.task == task)
-                return True
-            else:
-                print(f"Task not found: {task}")
-                return False
-        except Exception as e:
-            print(f"Error removing task: {e}")
-            return False
-
-    def get_all_tasks(self):
-        """Returns all tasks ordered by date and time."""
-        try:
-            # Retrieve all tasks
-            tasks = self.tasks_table.all()
-
-            # Sort the tasks by the 'task_datetime' field
-            sorted_tasks = sorted(tasks, key=lambda x: x['task_datetime'])
-            return [task['task'] for task in sorted_tasks]
-        except Exception as e:
-            print(f"Error retrieving tasks: {e}")
-            return []
-
-    def extract_task_datetime(self, task):
-        """Extracts the date and time from the task string and converts it to a datetime object."""
-        try:
-            # Extract the date and time from the task string (assuming it's at the end of the string)
-            date_str = task.split(":")[-1].strip()  # Get the date part
-            task_datetime = datetime.strptime(date_str, "%d/%m/%Y %I:%M %p")
-            return task_datetime
-        except Exception as e:
-            print(f"Error parsing task datetime: {e}")
-            return None

@@ -12,6 +12,8 @@ glob page = "chat";
 
 glob ready_to_chat = False;
 
+glob user_data_dic:obj;
+
 can start(backend_state: bool) {
     :g: page ;
     
@@ -49,10 +51,28 @@ can start(backend_state: bool) {
     } else {
         page = st.sidebar.selectbox("Go to", ["Details", "Chat"]);
     }
+    api_key: obj = chat_meta_db.get_api_key();
+    if api_key == None {
+        api_key = "";
+    }
+    new_api_key: str = st.sidebar.text_input("Groq API key", value=api_key, type='password');
+    if new_api_key != api_key {
+        if verify_groq_api_key(new_api_key) {
+            chat_meta_db.update_api_key(new_api_key);
+            os.environ["GROQ_API_KEY"] = new_api_key;
+        } else {
+            st.warning("Please set a vaild Groq api key");
+            new_api_key = api_key;
+        }
+    }
+    else
+    {
+        new_api_key = api_key;
+    }
     if (page == "Chat") {
         if ready_to_chat == False {
             st.warning(
-                "Please set your Groq API key in the User Details page."
+                "Please set your Groq API key."
             );
         }
         if st.sidebar.button('Start new chat') {
@@ -96,25 +116,127 @@ can start(backend_state: bool) {
 
 can user_data() {
     :g: chat_meta_db ;
-    
-    st.subheader("User Details");
-    api_key: obj = chat_meta_db.get_api_key();
-    if api_key == None {
-        api_key = "";
-    }
-    new_api_key: str = st.text_input("Groq API Key", api_key);
-    if new_api_key != api_key {
-        if verify_groq_api_key(new_api_key)
-        {
-            chat_meta_db.update_api_key(new_api_key);
-            os.environ["GROQ_API_KEY"] = new_api_key;
+    :g: user_data_dic;
+    st.markdown("""
+    <style>
+        .card {
+            border-radius: 5px;
+            padding: 5px;
+            margin: 10px 0px;
+            background-color: #f0f2f6;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
-        else{
-            st.warning(
-                "Please set a vaild Groq api key"
-            );
+        .metric-card {
+            border-radius: 5px;
+            padding: 15px;
+            margin: 5px 0px;
+            background-color: #ffffff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
+        .metric-label {
+            font-size: 0.8rem;
+            font-weight: bold;
+            color: #555;
+        }
+        .metric-value {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #0f52ba;
+        }
+        .gauge {
+            width: 100%;
+            height: 5px;
+            background-color: #e0e0e0;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .gauge-fill {
+            height: 100%;
+            background-color: #4CAF50;
+            transition: width 0.5s ease-out;
+        }
+    </style>
+    """, unsafe_allow_html=True);
+    user_data_dic = chat_meta_db.get_user_data();
+    st.title("Health Dashboard");
+    # Personal Information
+    #st.markdown("<div class='card'>", unsafe_allow_html=True);
+
+    st.subheader(" \U0001F4CB Personal Information");
+    [col1, col2, col3] = st.columns(3);
+    col1.markdown(create_metric_card("Name", user_data_dic["name"]), unsafe_allow_html=True);
+    col2.markdown(create_metric_card("Age", f"{user_data_dic['age_years']} years"), unsafe_allow_html=True);
+    col3.markdown(create_metric_card("Occupation", f"{user_data_dic['Occupation']}"), unsafe_allow_html=True);
+    st.markdown("</div>", unsafe_allow_html=True);
+
+    # Physical Measurements
+    #st.markdown("<div class='card'>", unsafe_allow_html=True);
+    st.divider();
+    st.subheader(" \U0001F4CF Physical Measurements");
+    [col1, col2, col3] = st.columns(3);
+    col1.markdown(create_metric_card("Height", f"{user_data_dic['Height_cm']} cm"), unsafe_allow_html=True);
+    col2.markdown(create_metric_card("Weight", f"{user_data_dic['Weight_kg']} kg"), unsafe_allow_html=True);
+    if (user_data_dic['Height_cm'] == 0)
+    {
+        bmi = 0;
     }
+    else{
+        bmi = user_data_dic['Weight_kg'] / ((user_data_dic['Height_cm'] / 100) ** 2);
+    }
+    col3.markdown(create_gauge(bmi, 18.5, 30, "BMI", "kg/m²"), unsafe_allow_html=True);
+    st.markdown("</div>", unsafe_allow_html=True);
+
+    # Vital Signs
+    #st.markdown("<div class='card'>", unsafe_allow_html=True);
+    st.divider();
+    st.subheader(" \U00002764\U0000FE0F Vital Signs");
+    [col1, col2] = st.columns(2);
+    if (len(user_data_dic["Blood_Pressure_mmHg"]) >0){
+        [systolic, diastolic] = user_data_dic["Blood_Pressure_mmHg"];
+    }
+    else{
+        [systolic, diastolic] = [0,0];
+    }
+    col1.markdown(create_gauge(systolic, 90, 180, "Systolic Blood Pressure", "mmHg"), unsafe_allow_html=True);
+    col2.markdown(create_gauge(diastolic, 60, 120, "Diastolic Blood Pressure", "mmHg"), unsafe_allow_html=True);
+    st.markdown("</div>", unsafe_allow_html=True);
+
+    # Lifestyle
+    #st.markdown("<div class='card'>", unsafe_allow_html=True);
+    st.divider();
+    st.subheader(" \U0001F3C3 Lifestyle");
+    [col1, col2] = st.columns(2);
+    col1.markdown(create_metric_card("Alcohol Intake", user_data_dic["Alcohol_Intake"]), unsafe_allow_html=True);
+    col2.markdown(create_metric_card("Physical Activity", user_data_dic["Physical_Activity_Level"]), unsafe_allow_html=True);
+    st.markdown("</div>", unsafe_allow_html=True);
+
+    # Blood Tests
+    #st.markdown("<div class='card'>", unsafe_allow_html=True);
+    st.divider();
+    st.subheader(" \U0001FA78 Blood Tests");
+    [col1, col2, col3] = st.columns(3);
+    col1.markdown(create_gauge(user_data_dic['Cholesterol_Level_mg_dL'], 150, 300, "Total Cholesterol", "mg/dL"), unsafe_allow_html=True);
+    col2.markdown(create_gauge(user_data_dic['HDL_mg_dL'], 40, 80, "HDL", "mg/dL"), unsafe_allow_html=True);
+    col3.markdown(create_gauge(user_data_dic['LDL_mg_dL'], 70, 160, "LDL", "mg/dL"), unsafe_allow_html=True);
+    [col1, col2, col3] = st.columns(3);
+    col1.markdown(create_gauge(user_data_dic['Triglycerides_mg_dL'], 50, 200, "Triglycerides", "mg/dL"), unsafe_allow_html=True);
+    col2.markdown(create_gauge(user_data_dic['Blood_Glucose_mg_dL'], 70, 140, "Blood Glucose", "mg/dL"), unsafe_allow_html=True);
+    col3.markdown(create_gauge(user_data_dic['HbA1c_percent'], 4, 8, "HbA1c", "%"), unsafe_allow_html=True);
+    st.markdown("</div>", unsafe_allow_html=True);
+}
+
+can create_metric_card(label:str, value:str){
+    unit = "";
+    output = f"<div class='metric-card'> <div class='metric-label'>{label}</div> <div class='metric-value'>{value} {unit}</div></div>";
+    return output;
+}
+can create_gauge(value:int, min_val:int, max_val:int, label:str, unit:str = "") {
+    percentage = (value - min_val) / (max_val - min_val) * 100;
+    output = "<div class='metric-card'><div class='metric-label'>" + label + 
+             "</div><div class='metric-value'>" + str(value) + " " + unit + 
+             "</div><div class='gauge'><div class='gauge-fill' style='width: " + str(percentage) + 
+             "%;'></div></div></div>";
+    return output;
 }
 
 can chat_interface(query_walker: walker, session: node) {
@@ -143,8 +265,7 @@ can display_response(response: str) {
     }
 }
 
-can verify_groq_api_key(api_key:str) 
-{
+can verify_groq_api_key(api_key: str) {
     url = "https://api.groq.com/openai/v1/chat/completions";
     headers = {
         "Authorization": f"Bearer {api_key}",
@@ -155,22 +276,19 @@ can verify_groq_api_key(api_key:str)
         "messages": [{"role": "user", "content": "Hello"}],
         "max_tokens": 1
     };
-    try
-    {
-        response = requests.post(url, headers=headers, data=json.dumps(payload));
-        if response.status_code == 200
-        {
+    try  {
+        response = requests.post(
+            url,
+            headers=headers, data=json.dumps(payload)
+        );
+        if response.status_code == 200 {
             print("valid api key");
             return True;
-        }
-        else
-        { 
+        } else {
             print("Invalid api key");
             return False;
         }
-    }
-    except Exception as e 
-    {
+    } except Exception as e {
         print("Invalid api key");
         return False;
     }

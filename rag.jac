@@ -105,7 +105,6 @@ obj rag_engine {
             embedding_function=self.get_embedding_function()
         );
         results = db.similarity_search_with_score(query, k=5);
-        print(type(results));
         return results;
     }
 }

@@ -46,10 +46,10 @@ https://github.com/user-attachments/assets/6be69801-2e86-40c9-9462-55d960e0b3cf
 
 ## Data-spatial-architecture
 
-![Data spactial structure](https://github.com/user-attachments/assets/a00294e4-089b-42de-92a6-d178eb93a65a)
+![Data spactial structure](https://github.com/user-attachments/assets/9b3f0fcb-2778-4306-a153-ec16df701b36)
 
 ## LLM-calls
 
-![llm calls](https://github.com/user-attachments/assets/f67854ef-d5ce-4059-808e-dce323e5ac73)
+![llm calls](https://github.com/user-attachments/assets/7deb4eb5-39b4-49cf-8ca6-590d2bb320ea)
  
 

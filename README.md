@@ -47,7 +47,7 @@ python3 -m pip install -r requirements.txt
 ## Technologies
   <div align="left">
   <ul>
-    <li>Python</li>
+    <li>Python (3.12)</li>
     <li>JacLang (Graph-Based Language)</li>
     <li>Groq (llama3.1-70b)</li>
     <li>MTLLM API library</li>
@@ -63,6 +63,19 @@ python3 -m pip install -r requirements.txt
 
 ![Data spactial structure](https://github.com/user-attachments/assets/9b3f0fcb-2778-4306-a153-ec16df701b36)
 
+### Nodes 
+
+<ul>
+    <li>Root : Starting node</li>
+    <li>User : Node to store user data</li>
+    <li>Session : Node which manages chat sessions</li>
+    <li>Router : Node that is responsible for directing the Query walker to "RAG","DATA" or "QA" according to the user's input</li>
+    <li>RAG : If the query walker enters the user input is given into the RAG engine and answered accordingly</li>
+    <li>DATA : If the user has provided information about themselves, update the database accordingly, and ask further questions if needed to gather more details about the user</li>
+    <li>QA : Answer question asked by the user using their personal data in the database</li>
+</ul>
+
+### Walkers 
 
 
 ## LLM-calls

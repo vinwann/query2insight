@@ -1,6 +1,7 @@
 
 - [Query2Insight](#Query2Insight)
   - [Introduction](#introduction)
+    - [Chat Interface](#Chat-Interface)
   - [Features](#Features)
   - [Dependencies](#dependencies)
   - [Launching](#Launching)
@@ -99,7 +100,7 @@ jac clean
 #### Query-walker
 
   <p>The Query walker is responsible for carrying the user input to the respective nodes getting the LLM response and returning the LLM response to the session node to be saved. For each user input a query walker is created</p>
-  #### Lifecycle of a Query-walker
+  #####  Lifecycle of a Query-walker
   <ol>
     <li>Spawning in the session node</li>
     <li>Visiting the router node and getting directed to "RAG", "QA" or "DATA" (end nodes)nodes</li>

@@ -1,5 +1,4 @@
 :node:RAG:can:print_output {
-    print("RAQ");
     tinydb_service = TinyDBService(here.session_id);
     self.answer = self.chat_llm(
         assistant_type=here.session_assitant_type,
@@ -11,6 +10,7 @@
     if len(matches) > 0 {
         self.answer = matches[0];
     }
+    print(matches);
     gui.display_response(self.answer);
     here.user_query["role"] = "assistant";
     here.user_query["content"] = self.answer;
@@ -29,6 +29,7 @@
     if len(matches) > 0 {
         self.answer = matches[0];
     }
+    print(matches);
     gui.display_response(self.answer);
     here.user_query["role"] = "assistant";
     here.user_query["content"] = self.answer;
@@ -48,7 +49,10 @@
     {
         for i in self.data_entry_answer
         {
+            if i != "None"
+            {
             chat_meta_db.update_user_from_string(i);
+            }
         }
     }
     self.answer = self.chat_llm(
@@ -59,29 +63,10 @@
     );
     
     matches = re.findall(r'"([^"]*)"', self.answer);
-    print("matches ", matches);
     if len(matches) > 0 {
         self.answer = matches[0];
     }
-    gui.display_response(self.answer);
-    here.user_query["role"] = "assistant";
-    here.user_query["content"] = self.answer;
-    here.inquiry_by_user = '';
-    visit [<--];
-}
-
-:node:user_TODO:can:print_output {
-    tinydb_service = TinyDBService(here.session_id);
-    self.answer = self.chat_llm(
-        todo_list=here.todo_list,
-        query=here.inquiry_by_user,
-        chat_history=tinydb_service.return_chat_history()
-    );
-    matches = re.findall(r'"([^"]*)"', self.answer);
-    print("matches ", matches);
-    if len(matches) > 0 {
-        self.answer = matches[0];
-    }
+    print(matches);
     gui.display_response(self.answer);
     here.user_query["role"] = "assistant";
     here.user_query["content"] = self.answer;
@@ -91,24 +76,20 @@
 
 :node:session:can:send_query_to_router {
     :g: chat_meta_db ;
-    
-    print("session_id ", self.session_id);
     if (here.just_init) {
         here.just_init = False;
         gui.chat_interface(here, self);
         here.session_id = self.session_id;
         self.user_data= chat_meta_db.get_user_data();
         here.user_data = self.user_data;
-        here.todo_list = self.todo_list;
         here.chat_history = [];
         if (len(here.inquiry_by_user) > 0) {
             self.session_assitant_type = self.pick_assitant_type(here.inquiry_by_user);
             matches = re.findall(r'"([^"]*)"', self.session_assitant_type);
-            print("matches ", matches);
             if len(matches) > 0 {
                 self.session_assitant_type = matches[0];
             }
-            print(self.session_assitant_type);
+            print("Selected assistant type ",self.session_assitant_type);
             here.session_assitant_type = self.session_assitant_type;
         }
     }
@@ -131,7 +112,6 @@
             chat_name=self.chat_name
         );
         matches = re.findall(r'"([^"]*)"', self.chat_name);
-        print("matches ", matches);
         if len(matches) > 0 {
             self.chat_name = matches[0];
         }
@@ -148,11 +128,10 @@
         tinydb_service = TinyDBService(here.session_id);
         task: task_type = self.router_with_llm(
             query=here.inquiry_by_user,
-            todo_list=here.todo_list,
             user_data=here.user_data,
             chat_history=tinydb_service.return_chat_history()
         );
-        print(task);
+        print("Task type ",task);
         if task == task_type.RAG_TYPE {
             visit [-->](`?RAG);
         } elif task == task_type.QA_TYPE  {
@@ -193,7 +172,6 @@
             session_node = here ++> session(
                 session_id=chat_id['id'],
                 user_data= chat_meta_db.get_user_data(),   
-                todo_list= chat_meta_db.get_all_tasks(),
                 tinydb_service=TinyDBService(chat_id['id']),
                 chat_history=temp_tinydb_service.return_chat_history()
             );
@@ -210,7 +188,6 @@
         n = here ++> session(
             session_id=new_session_id,
             user_data= chat_meta_db.get_user_data(),   
-            todo_list= chat_meta_db.get_all_tasks(),
             tinydb_service=TinyDBService(new_session_id)
         );
         chat_meta_db.insert_data(

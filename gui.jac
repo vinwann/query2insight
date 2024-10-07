@@ -52,12 +52,10 @@ can start(backend_state: bool) {
         page = st.sidebar.selectbox("Go to", ["Details", "Chat"]);
     }
     api_key: obj = chat_meta_db.get_api_key();
-    print("api_key ",api_key);
     if api_key == None {
         api_key = "";
     }
     new_api_key: str = st.sidebar.text_input("Groq API key", value=api_key, type='password');
-    print("new_api_key ",new_api_key);
     if new_api_key != api_key {
         if verify_groq_api_key(new_api_key) {
             chat_meta_db.update_api_key(new_api_key);
@@ -168,7 +166,7 @@ can user_data() {
     [col1, col2, col3] = st.columns(3);
     col1.markdown(create_metric_card("Name", user_data_dic["name"]), unsafe_allow_html=True);
     col2.markdown(create_metric_card("Age", f"{user_data_dic['age_years']} years"), unsafe_allow_html=True);
-    col3.markdown(create_metric_card("Marital Status", "Married" if user_data_dic["Married"] else "Single"), unsafe_allow_html=True);
+    col3.markdown(create_metric_card("Occupation", f"{user_data_dic['Occupation']}"), unsafe_allow_html=True);
     st.markdown("</div>", unsafe_allow_html=True);
 
     # Physical Measurements

@@ -82,7 +82,6 @@ walker query {
     has user_query: dict = {"role": '', "content": ''};
     has query_state: int = 0;
     has user_data: 'data about the health status of the user': dict = {};
-    has todo_list: 'The tasks to be done by the user in the future.': list = [];
     has session_assitant_type: string = '';
 }
 
@@ -96,7 +95,6 @@ node session {
     has chat_file_name: string = 'chat';
     has tinydb_service: obj = '';
     has user_data: dict = {};
-    has todo_list: list = [];
     has chat_name: string = "";
     has session_assitant_type: string = '';
 
@@ -111,19 +109,6 @@ node session {
     chat_name_suggestion(chat_history: 'The chat history': list, chat_name: 'The previous chat name suggested': str) -> 'response': str by llm(temperature=1);
 }
 
-'''
-Consists of user data such as age, pressure, married status.
-'''
-node data {
-    has user_data: dict = {"age": 0, "Pressure": (0, 0), "Married": False};
-}
-
-'''
-List of things to do by the user.
-'''
-node todo {
-    has todo_list: list = [];
-}
 
 '''
 This is the chat walker which will be used to chat with the user.
@@ -146,8 +131,6 @@ This is where we create the graph.
 '''
 walker create_graph {
     has user_data: dict = {};
-    has todo_list: list = [];
-
     can generate_graph with `root entry;
 }
 
@@ -155,7 +138,7 @@ node router {
     #has match:obj =  re.search(r'(@\w+)\s(.*)', '');
     can direct with query entry;
     can 'route the query to the appropriate task type'
-    router_with_llm(query: 'Query from the user to be routed.': str, todo_list: 'The tasks to be done by the user in the future.': list, user_data: 'data about the health status of the user.': dict, chat_history: 'Previous Conversation with the user': list) -> task_type by llm(
+    router_with_llm(query: 'Query from the user to be routed.': str, user_data: 'data about the health status of the user.': dict, chat_history: 'Previous Conversation with the user': list) -> task_type by llm(
         method="Reason",
         temperature=0.0,
         incl_info=(router_examples)
@@ -182,24 +165,14 @@ node user_DATA {
     has answer: string = '';
     has data_entry_answer: string= '';
     can print_output with query entry;
-    can 'Using answer given by the user output the field that should be updated in user_data. If there are further empty fields in the user_data ask about them and get answers, if you are uncertain of a field , the user refuses to answer or the answer doesnt make sense return None. If the suitable field is not in user data create one. Use the exmples given and only reply in that formate'
+    can 'Using answer given by the user output the field that should be updated in user_data.if you are uncertain of a field , the user refuses to answer or the answer doesnt make sense return None. If the suitable field is not in user data create one. Use the exmples given and only reply in that formate. Do not ask questions'
     data_entry(user_data: 'data about the user': list, answer: 'Data given by the user to be answered.': str, chat_history: 'Previous Conversation with the user': list) -> 'response': list by llm(
         method="Reason",
         temperature=0,
         incl_info=(data_examples)
     );
-    can 'You are an personal assistant.The user has answered a question to fill up the user data regarding the user you have to thank the user for answering.The field the answered data belongs to has been determind and given in tfiled variable. IF the user data is empty ask only one question from the empty fields in the user data to get information about the user. Ask from the user'
+    can 'You are an personal assistant that asks questions from a user.The user has answered a question to fill up the user data regarding the user you have to thank the user for answering.The field the answered data belongs to has been determind and given in the field variable. IF the user data is empty ask only one question from the user for an empty field in the user data to get information about the user.'
     chat_llm(user_data: 'data about the user': list, query: 'Answer from the user to be answered.': str,field:'Assied data field for the users answer ':str, chat_history: 'Previous Conversation with the user': list) -> 'response': str by llm(temperature=0.7);
-}
-
-node user_TODO {
-    has answer: string = '';
-    #has assitant_type: string = "programming assiatant";
-    has name: 'semstring': str = 'Every reply should be i dont know, thats the only response you can give';
-    #'You are a Health Assistant. Give a response based on the query using my todo list.'
-    can print_output with query entry;
-    can 'Every reply should be i dont know, thats the only response you can give'
-    chat_llm(todo_list: 'data about the health status of the user': list, query: 'The tasks to be done by the user in the future.': str, chat_history: 'Previous Conversation with the user': list) -> 'response': str by llm(temperature=0.7, max_tokens=1024);
 }
 
 can main() {

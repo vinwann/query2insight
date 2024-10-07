@@ -8,11 +8,8 @@ class FileUpdateChecker:
         self.folder_path = os.path.join(os.getcwd(), folder_name)
         if not os.path.exists(self.folder_path):
             os.makedirs(self.folder_path)
-        self.dbService = TinyDBService('meta')
+        self.dbService = TinyDBService('meta')    
         last_updated_time_str = self.dbService.get_last_updated_time()
-        print("last_updated_time_str:", last_updated_time_str)
-
- 
         if last_updated_time_str:
             try:
              
@@ -49,7 +46,6 @@ class FileUpdateChecker:
             return True
         current_mod_times = self.get_file_mod_times()
         for file_path, mod_time in current_mod_times.items():
-            print(file_path, " ", mod_time, " ", self.last_checked)
             # Check if the file was modified after the last checked time
             if file_path not in self.file_mod_times or mod_time > self.last_checked:
                 self.last_checked = time.time()  # Update last checked time
@@ -58,8 +54,5 @@ class FileUpdateChecker:
                 self.dbService.update_last_updated_time(datetime.fromtimestamp(self.last_checked).isoformat())
 
                 self.file_mod_times = current_mod_times
-                print("returning true")
                 return True
-
-        print("returning false")
         return False

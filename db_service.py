@@ -14,7 +14,7 @@ class TinyDBService:
 
         self.db = self.connect_or_create_db()
         self.initialize_user_data()
-        self.initialize_tasks()
+  
         
     def connect_or_create_db(self):
         """Connects to the existing database or creates a new one if it doesn't exist."""
@@ -28,7 +28,6 @@ class TinyDBService:
             self.metadata_table = db.table("metadata")
             self.api_table = db.table("apidata")
             self.user_data_table = db.table("user_data")
-            self.tasks_table = db.table("tasks")
             return db
         except Exception as e:
             print(f"Error connecting to or creating database: {e}")
@@ -44,7 +43,7 @@ class TinyDBService:
                 "Height_cm": 0,
                 "Weight_kg": 0,
                 "Blood_Pressure_mmHg": [],
-                "Married": False,
+                "Occupation": "",
                 "Alcohol_Intake": "",
                 "Physical_Activity_Level": "",
                 "Cholesterol_Level_mg_dL": 0,
@@ -56,15 +55,6 @@ class TinyDBService:
             }
             self.user_data_table.insert(default_user_data)
             print("Initialized user_data with default structure.")
-
-    def initialize_tasks(self):
-        """Initializes tasks with an empty todo_list if empty."""
-        if len(self.tasks_table) == 0:
-            default_tasks = {
-                "todo_list": []
-            }
-            self.tasks_table.insert(default_tasks)
-            print("Initialized tasks with default structure.")
 
 
     def insert_data(self, data):
@@ -228,53 +218,3 @@ class TinyDBService:
             print(f"Error retrieving user data: {e}")
             return None
         
-    # Tasks methods
-
-    def add_task(self, task):
-        """Adds a task to the tasks table."""
-        try:
-            task_datetime = self.extract_task_datetime(task)
-            self.tasks_table.insert({"task": task, "task_datetime": task_datetime})
-            return True
-        except Exception as e:
-            print(f"Error adding task: {e}")
-            return False
-
-    def remove_task(self, task):
-        """Removes a task from the tasks table based on the task description."""
-        try:
-            task_query = Query()
-            result = self.tasks_table.search(task_query.task == task)
-            if result:
-                self.tasks_table.remove(task_query.task == task)
-                return True
-            else:
-                print(f"Task not found: {task}")
-                return False
-        except Exception as e:
-            print(f"Error removing task: {e}")
-            return False
-
-    def get_all_tasks(self):
-        """Returns all tasks ordered by date and time."""
-        try:
-            # Retrieve all tasks
-            tasks = self.tasks_table.all()
-
-            # Sort the tasks by the 'task_datetime' field
-            sorted_tasks = sorted(tasks, key=lambda x: x['task_datetime'])
-            return [task['task'] for task in sorted_tasks]
-        except Exception as e:
-            print(f"Error retrieving tasks: {e}")
-            return []
-
-    def extract_task_datetime(self, task):
-        """Extracts the date and time from the task string and converts it to a datetime object."""
-        try:
-            # Extract the date and time from the task string (assuming it's at the end of the string)
-            date_str = task.split(":")[-1].strip()  # Get the date part
-            task_datetime = datetime.strptime(date_str, "%d/%m/%Y %I:%M %p")
-            return task_datetime
-        except Exception as e:
-            print(f"Error parsing task datetime: {e}")
-            return None

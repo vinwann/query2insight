@@ -45,72 +45,84 @@ can start(backend_state: bool) {
             """    """,
         unsafe_allow_html=True
     );
-    start_new_chat = False;
+    start_new_chat = False;  # Initialize the flag for starting a new chat
+    
+    # Sidebar selection to navigate between "Chat" and "Details" pages
     if ready_to_chat {
         page = st.sidebar.selectbox("Go to", ["Chat", "Details"]);
     } else {
         page = st.sidebar.selectbox("Go to", ["Details", "Chat"]);
     }
+    
+    # Get the current API key from the database
     api_key: obj = chat_meta_db.get_api_key();
     if api_key == None {
         api_key = "";
     }
+    
+    # Input for Groq API key in the sidebar
     new_api_key: str = st.sidebar.text_input("Groq API key", value=api_key, type='password');
+    
+    # If a new API key is provided, verify it and update the database
     if new_api_key != api_key {
         if verify_groq_api_key(new_api_key) {
-            chat_meta_db.update_api_key(new_api_key);
-            os.environ["GROQ_API_KEY"] = new_api_key;
+            chat_meta_db.update_api_key(new_api_key);  # Update the API key in the database
+            os.environ["GROQ_API_KEY"] = new_api_key;  # Set the API key as an environment variable
         } else {
-            st.warning("Please set a vaild Groq api key");
-            new_api_key = api_key;
+            st.warning("Please set a valid Groq API key");
+            new_api_key = api_key;  # Revert to the old API key if invalid
         }
     }
-    else
-    {
-        new_api_key = api_key;
+    else {
+        new_api_key = api_key;  # No change to API key
     }
+    
+    # If the page is "Chat"
     if (page == "Chat") {
         if ready_to_chat == False {
-            st.warning(
-                "Please set your Groq API key."
-            );
+            st.warning("Please set your Groq API key.");  # Show a warning if the API key isn't set
         }
+        
+        # Button to start a new chat
         if st.sidebar.button('Start new chat') {
             start_new_chat = True;
         }
+        
+        # File uploader for users to upload files
         uploaded_file = st.sidebar.file_uploader("Choose a file");
         if (uploaded_file != None) {
-            save_path = "uploaded_files";
+            save_path = "uploaded_files";  # Directory to save uploaded files
             if (os.path.exists(save_path) != True) {
-                os.mkdir(save_path);
+                os.mkdir(save_path);  # Create directory if it doesn't exist
             }
             file_path = save_path + "/" + uploaded_file.name;
             
             try  {
+                # Save the uploaded file
                 with open(file_path, "wb") as f {
                     f.write(uploaded_file.getbuffer());
                 }
-                ;    st.sidebar.write(
-                    f"File saved successfully at: {file_path}"
-                );
-                start_new_chat = "new upload";
+                st.sidebar.write(f"File saved successfully at: {file_path}");
+                start_new_chat = "new upload";  # Set the chat status to "new upload"
             } except Exception as e {
                 st.sidebar.write(f"Error: {e}");
             }
         }
+        
+        # List of previous chats to select from
         st.sidebar.subheader("Previous Chats");
         for chat_id in reversed(chat_meta_db.return_all_chats()) {
-            if (st.sidebar.button(
-                f"{chat_id['name']}",
-                key=f"btn_{chat_id['id']}"
-            )) {
-                start_new_chat = chat_id['id'];
+            if (st.sidebar.button(f"{chat_id['name']}", key=f"btn_{chat_id['id']}")) {
+                start_new_chat = chat_id['id'];  # Load an existing chat session
             }
         }
-        return start_new_chat;
-    } else {
-        user_data();
-        return "user details";
+        
+        return start_new_chat;  # Return the status for starting a new chat
+    } 
+    # If the page is "Details"
+    else {
+        user_data();  # Call the user data function to display user details
+        return "user details";  # Return the details page status
     }
 }
 

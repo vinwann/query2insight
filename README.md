@@ -24,7 +24,7 @@
 # Query2Insight
 
 ## Introduction
-  <p>Query2Insight is a fully open-source LLM-powered chatbot designed to provide users with tailored insights and assistance across various domains. The app integrates several cutting-edge technologies to enhance its functionality and user experience. It utilizes the power of Groq for efficient model execution and leverages Streamlit for an interactive user interface. The backend is supported by TinyDBService, which manages the chatbot's metadata and session information. The RAG engine plays a crucial role in retrieving context-specific information to ensure accurate responses. The chatbot is capable of handling different types of queries, including those related to programming, health, and general assistance.</p>
+  <p>Query2Insight is a fully open-source lightweight LLM-powered chatbot designed to provide users with tailored insights and assistance to its users. The application utilizes Jac-Lang as its backbone to seamlessly interact with LLMs provided through Groq and front end which is powered by Streamlit. The backend is supported by TinyDBService, which manages the chatbot's metadata, session information, chat history, and user data. The RAG engine plays a crucial role in retrieving context-specific information using the documents the user has uploaded. The chatbot is capable of extracting relevant data about the user in a conversational manner.</p>
 
 ### Chat Interface
 

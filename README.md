@@ -76,14 +76,14 @@ jac clean
   <div align="left">
   <ul>
     <li>Python (3.12)</li>
-    <li>JacLang (Graph-Based Language)</li>
+    <li>Jac-Lang </li>
     <li>Groq (llama3.1-70b)</li>
     <li>MTLLM API library</li>
     <li>Streamlit (GUI)</li>
-    <li>TinyDB (Database Management for metadata)</li>
+    <li>TinyDB (Database Management for metadata, user data, and API keys)</li>
     <li>Ollama (Generate embeddings)</li>
     <li>ChromaDB (Vector database)</li>
-    <li>RAG Engine (Retrieval-Augmented Generation)</li>
+    <li>RAG Engine </li>
   </ul>
 </div>
 
@@ -126,14 +126,16 @@ jac clean
   
 ## LLM-calls
 
-![llm calls](https://github.com/user-attachments/assets/96920c0b-2dce-4caf-9c76-82abd197668e)
+![llm calls](https://github.com/user-attachments/assets/89fa8ae5-0537-40d7-ba98-9d912b7b269c)
 
 ### Picking Assistant Type
 
+<p>To aid LLM calls done with the user input at the end nodes an assistant type is generated using the user's input </p>
+
 ```shell
-glob role_examples: 'Examples for picking assitant role.You are not limited to these examples.if you are uncerteain of the role pick personal assistant': dict[str, str] = {
+glob role_examples: 'Examples for picking assitant role. You are not limited to these examples. if you are uncertain of the role pick personal assistant': dict[str, str] = {
 'Can you help me with programming?': 'Programming assistant',
-'Hi help me with this pyhton ?': 'Programming assistant',
+'Hi help me with this python ?': 'Programming assistant',
 'What are the symptoms of low blood pressure?': 'Health assistant',
 'Hi?': 'personal assistant',
 'Hi who am i?': 'personal assistant'
@@ -149,21 +151,24 @@ can 'You a smart assitant role picker, using the user query you have to decide w
 ```
 ### Suggest Chat Name
 
+<p>Considering the chat history and the previous name suggested by the LLM a chat name is generated. This will be updated with every interaction in the chat to reflect the overall picture of the chat</p>
+
 ```shell
 can 'You a smart assitant that has to pick a name for a chat an user has had. Looking at the chat history suggest a name for the chat and the previous name recommned by you. The name has to be short not more than 5 words and capture the entire conversation'
     chat_name_suggestion(chat_history: 'The chat history': list, chat_name: 'The previous chat name suggested': str) -> 'response': str by llm(temperature=1);
 ```
 ### Picking End Node
 
+<p>According to the user's input the end node is determined. The LLM is made to reason with only three options given. Examples are given to help the LLM decide the type</p>
+
 ```shell
 enum task_type {
     RAG_TYPE: 'Need to use Retrivable information in specific topic' = "RAG",
     QA_TYPE: 'Need to use given user information about themselves or questions asked about themselves' = "user_qa",
-    DATA_TYPE: 'Need to use when the user is giving an answer to an question asked by the assistant to update user data' = 'DATA'
+    DATA_TYPE: 'Need to use when the user is giving an answer to a question asked by the assistant to update user data' = 'DATA'
 }
 
 glob router_examples: 'Examples of routing of a query.if you are uncerteain of the routing method pick task_type.QA_TYPE. Do not pick anything outside of these three options': dict[str, task_type] = {
-#'When is my next check up?': task_type.TODO_TYPE,
 'whats my name?': task_type.QA_TYPE,
 'How to reduce cholrestrole': task_type.RAG_TYPE,
 'whats are my tasks for today?': task_type.QA_TYPE,
@@ -184,12 +189,16 @@ router_with_llm(query: 'Query from the user to be routed.': str, user_data: 'dat
 ```
 ### Answering Using RAG
 
+<p>The LLM uses the retrieved context about the user input via the vector database and answers the user</p>
+
 ```shell
 can 'You an Assistant.The type of assistant you are is given in assistant_type use it to give detailed answers. Give a response based on the retrived_context in a detailed manner'
     chat_llm(query: 'Question from the user to be answered.': str, assistant_type: 'The type of assistant you are use this when answering ': str, retrived_context: 'Retrived information from expert articles': list, chat_history: 'Previous Conversation with the user': list) -> 'response': str by llm(temperature=1);
 ```
 
 ### Provided User Data Identification
+
+<p>The application has to collect data about the user through conversation. When the user has provided such information it has to be converted the field that should be updated and the data. The LLM is tasked with identifying the fields in the user data table and matching the data given by the user to or creating a new field and matching the data to that field. The LLM is given examples and is supposed to reason and output a list of data fields and the corresponding data </p>
 
 ```shell
 
@@ -216,12 +225,16 @@ can 'Using answer given by the user output the field that should be updated in u
 
 ### Asking Questions From User
 
+<p>This LLM call will ask further questions from the user if there are more data it needs to find out</p>
+
 ```shell
 can 'You are an personal assistant that asks questions from a user.The user has answered a question to fill up the user data regarding the user you have to thank the user for answering.The field the answered data belongs to has been determind and given in the field variable. IF the user data is empty ask only one question from the user for an empty field in the user data to get information about the user.'
     chat_llm(user_data: 'data about the user': list, query: 'Answer from the user to be answered.': str,field:'Assied data field for the users answer ':str, chat_history: 'Previous Conversation with the user': list) -> 'response': str by llm(temperature=0.7);
 ```
 
 ### QnA with User
+
+<p>This LLM call will answer the user using the user data in the database</p>
 
 ```shell
 can 'You are an personal assistant.Answer in friendly detailed manner only answer only questions that are in your domain if you dont know the answer then say that you dont know in a polite manner. IF the user data is empty ask questions about the fields in the user data to get information about the user'

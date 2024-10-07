@@ -3,6 +3,7 @@
   - [Introduction](#introduction)
   - [Features](#Features)
   - [Dependencies](#dependencies)
+  - [Launching](#Launching)
   - [Technologies](#Technologies)
   - [Data spatial architecture](#Data-spatial-architecture)
   - [LLM-calls](#LLM-calls)
@@ -44,6 +45,20 @@ Install the necessary dependencies by running. Ensure that you have Python 3.12
 ```shell
 python3 -m pip install -r requirements.txt
 ```
+
+## Launching 
+
+After installing all dependencies, you can run the app with the following command.
+
+```shell
+streamlit run app.py
+```
+Make sure to delete the Jac cache before each run.
+
+```shell
+jac clean
+```
+
 ## Technologies
   <div align="left">
   <ul>
@@ -67,17 +82,33 @@ python3 -m pip install -r requirements.txt
 
 <ul>
     <li>Root : Starting node</li>
-    <li>User : Node to store user data</li>
-    <li>Session : Node which manages chat sessions</li>
-    <li>Router : Node that is responsible for directing the Query walker to "RAG","DATA" or "QA" according to the user's input</li>
-    <li>RAG : If the query walker enters the user input is given into the RAG engine and answered accordingly</li>
-    <li>DATA : If the user has provided information about themselves, update the database accordingly, and ask further questions if needed to gather more details about the user</li>
-    <li>QA : Answer question asked by the user using their personal data in the database</li>
+    <li>User: Node to store user data</li>
+    <li>Session: Node which manages chat sessions. For each chat, there exists a session node that is unique for each chat. Each session node will have its own child nodes</li>
+    <li>Router: Node that is responsible for directing the Query walker to "RAG", "DATA" or "QA" according to the user's input</li>
+    <li>RAG: If the query walker enters the user input is given into the RAG engine and answered accordingly</li>
+    <li>DATA: If the user has provided information about themselves, update the database accordingly, and ask further questions if needed to gather more details about the user</li>
+    <li>QA: Answer questions asked by the user using their personal data in the database</li>
 </ul>
 
 ### Walkers 
 
+#### Chat-walker
 
+  <p>The Chat walker is responsible for creating new chat sessions and switching between chats when the user commands it</p>
+  
+#### Query-walker
+
+  <p>The Query walker is responsible for carrying the user input to the respective nodes getting the LLM response and returning the LLM response to the session node to be saved. For each user input a query walker is created</p>
+  #### Lifecycle of a Query-walker
+  <ol>
+    <li>Spawning in the session node</li>
+    <li>Visiting the router node and getting directed to "RAG", "QA" or "DATA" (end nodes)nodes</li>
+    <li>Visiting the end nodes and collecting the LLM response</li>
+    <li>Returning to the session node through the router node</li>
+    <li>Saving the LLM response</li>
+    <li>Death</li>
+</ol>
+  
 ## LLM-calls
 
 ![llm calls](https://github.com/user-attachments/assets/7deb4eb5-39b4-49cf-8ca6-590d2bb320ea)

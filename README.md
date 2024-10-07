@@ -23,10 +23,13 @@
   </ul>
 </div>
 
-![ui](https://github.com/user-attachments/assets/8fda7313-b5ef-41db-a460-a9a342f73a04)
+![ui](https://github.com/user-attachments/assets/cadeb92d-7fd6-4358-8069-f30f321a7683)
 
+![User data](https://github.com/user-attachments/assets/bec542ae-66a8-4a74-8e85-c72d49a8520b)
 
-https://github.com/user-attachments/assets/e5065d8f-5ada-451c-9e31-35fca53ad159
+https://github.com/user-attachments/assets/65eceefa-0af3-421b-843c-b249107f7061
+
+https://github.com/user-attachments/assets/6be69801-2e86-40c9-9462-55d960e0b3cf
 
 <p><strong>Data spatial architecture</strong></p>
 

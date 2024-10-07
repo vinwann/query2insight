@@ -213,45 +213,54 @@ can main() {
     :g: ready_to_chat ;
     
     :g: llm ;
-    
-    feedback_from_gui = gui.start(ready_to_chat);
-    if (api_key
-        and feedback_from_gui != "user details") {
-        if (type(feedback_from_gui) == bool
-            and feedback_from_gui == True) {
-            app_state = app_states.NEW;
-        } elif (type(feedback_from_gui) == str) {
-            if (feedback_from_gui == "new upload") {
-                documents: list = RagEngine.load_documents();
-                chunks: list = RagEngine.split_documents(documents);
-                RagEngine.add_to_chroma(chunks);
-            } else {
-                current_session_id = feedback_from_gui;
-            }
-        }
-        if (app_state == app_states.BOOT_UP) {
-            os.environ["GROQ_API_KEY"] = api_key;
-            llm = Groq(model_name="llama-3.1-70b-versatile");
-            create_graph() spawn root;
-            chat() spawn [root-->](`?user)[0];
-        } elif (app_state == app_states.NEW) {
-            chat() spawn [root-->](`?user)[0];
-        } else {
-            count: int = 0;
-            for i in [[root-->](`?user)[0]-->](`?session) {
-                if i.session_id == current_session_id {
-                    break;
+    try 
+    {
+        feedback_from_gui = gui.start(ready_to_chat);
+        if (api_key and feedback_from_gui != "user details") 
+        {
+            if (type(feedback_from_gui) == bool
+                and feedback_from_gui == True) {
+                app_state = app_states.NEW;
+            } elif (type(feedback_from_gui) == str) {
+                if (feedback_from_gui == "new upload") {
+                    documents: list = RagEngine.load_documents();
+                    chunks: list = RagEngine.split_documents(documents);
+                    RagEngine.add_to_chroma(chunks);
+                } else {
+                    current_session_id = feedback_from_gui;
                 }
-                count += 1;
             }
-            query() spawn [[root-->](`?user)[0]-->](`?session)[count];
-        }
-    } else {
-        api_key = chat_meta_db.get_api_key();
-        if api_key {
-            ready_to_chat = True;
-        } else {
-            ready_to_chat = False;
+            if (app_state == app_states.BOOT_UP) {
+                os.environ["GROQ_API_KEY"] = api_key;
+                llm = Groq(model_name="llama-3.1-70b-versatile");
+                create_graph() spawn root;
+                chat() spawn [root-->](`?user)[0];
+            } elif (app_state == app_states.NEW) {
+                chat() spawn [root-->](`?user)[0];
+            } else {
+                count: int = 0;
+                for i in [[root-->](`?user)[0]-->](`?session) {
+                    if i.session_id == current_session_id {
+                        break;
+                    }
+                    count += 1;
+                }
+                query() spawn [[root-->](`?user)[0]-->](`?session)[count];
+            }
+        } 
+        else 
+        {
+            api_key = chat_meta_db.get_api_key();
+            if api_key {
+                ready_to_chat = True;
+            } else {
+                ready_to_chat = False;
+            }
         }
     }
+    except Exception as e
+    {
+            print(f"Error: {e}");
+    }
+    
 }

@@ -8,7 +8,6 @@
         chat_history=tinydb_service.return_chat_history()
     );
     matches = re.findall(r'"([^"]*)"', self.answer);
-    print("matches ", matches);
     if len(matches) > 0 {
         self.answer = matches[0];
     }
@@ -27,7 +26,6 @@
         chat_history=tinydb_service.return_chat_history()
     );
     matches = re.findall(r'"([^"]*)"', self.answer);
-    print("matches ", matches);
     if len(matches) > 0 {
         self.answer = matches[0];
     }
@@ -49,7 +47,6 @@
     if (self.data_entry_answer and self.data_entry_answer != "None")
     {
         matches = re.findall(r'"([^"]*)"', self.data_entry_answer);
-        print("matches ", matches);
         if len(matches) > 0 {
             self.data_entry_answer= matches[0];
         }

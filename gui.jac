@@ -64,7 +64,12 @@ can start(backend_state: bool) {
             os.environ["GROQ_API_KEY"] = new_api_key;
         } else {
             st.warning("Please set a vaild Groq api key");
+            new_api_key = api_key;
         }
+    }
+    else
+    {
+        new_api_key = api_key;
     }
     if (page == "Chat") {
         if ready_to_chat == False {

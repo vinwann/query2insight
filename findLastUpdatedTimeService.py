@@ -1,7 +1,7 @@
 import os
 import time
 from datetime import datetime
-from db_service import TinyDBService
+from dbService import TinyDBService
 
 class FileUpdateChecker:
     def __init__(self, folder_name):

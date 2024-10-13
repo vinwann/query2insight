@@ -5,7 +5,7 @@ import:py json;
 import:py from mtllm.llms, Groq;  # Importing necessary modules including Groq (used for LLM calls)
 import:jac gui;
 import:py streamlit as st;  # Streamlit for GUI handling
-import:py from db_service, TinyDBService;  # Database service to manage metadata and user data
+import:py from dbService, TinyDBService;  # Database service to manage metadata and user data
 include:jac rag;  # Including the retrieval-augmented generation (RAG) engine
 
 # Connecting the database that stores metadata and user data
